@@ -31,6 +31,51 @@ const FinanceSection = () => {
     'Salary', 'Freelance', 'Investment', 'Business', 'Other'
   ];
 
+  // Function to add sample transactions for testing
+  const addSampleTransactions = () => {
+    const sampleTransactions = [
+      {
+        type: 'income',
+        amount: 5000,
+        category: 'Salary',
+        description: 'Monthly Salary',
+        date: new Date().toISOString().split('T')[0]
+      },
+      {
+        type: 'expense',
+        amount: 1200,
+        category: 'Bills & Utilities',
+        description: 'Rent Payment',
+        date: new Date().toISOString().split('T')[0]
+      },
+      {
+        type: 'expense',
+        amount: 250,
+        category: 'Food & Dining',
+        description: 'Groceries',
+        date: new Date(Date.now() - 86400000).toISOString().split('T')[0] // Yesterday
+      },
+      {
+        type: 'income',
+        amount: 800,
+        category: 'Freelance',
+        description: 'Web Design Project',
+        date: new Date(Date.now() - 172800000).toISOString().split('T')[0] // 2 days ago
+      }
+    ];
+
+    sampleTransactions.forEach(async (transaction) => {
+      try {
+        await financeService.createTransaction(transaction);
+      } catch (error) {
+        console.error('Error creating sample transaction:', error);
+      }
+    });
+
+    toast.success('Sample transactions added!');
+    setTimeout(() => fetchData(), 500); // Refresh data after adding
+  };
+
   useEffect(() => {
     fetchData();
   }, [filterPeriod]);
@@ -41,22 +86,41 @@ const FinanceSection = () => {
   }, []);
 
   const generatePDFReport = async (period = 'week', includeAll = false) => {
+    // First, try to get transactions directly from localStorage as a fallback
+    const userId = JSON.parse(localStorage.getItem('todo_app_user'))?.id;
+    const storedTransactions = JSON.parse(localStorage.getItem('todo_app_transactions') || '[]')
+      .filter(t => !userId || t.userId === userId);
+    
+    console.log('Stored transactions from localStorage:', storedTransactions);
+    
     // Always fetch latest transactions for the report
     let currentTransactions = transactions;
     
     try {
       const transactionsData = await financeService.getTransactions();
+      console.log('Fetched transactions from service:', transactionsData);
+      
       if (transactionsData && transactionsData.length > 0) {
         currentTransactions = transactionsData;
         setTransactions(transactionsData);
+      } else if (storedTransactions.length > 0) {
+        // Use localStorage data if service returns empty
+        currentTransactions = storedTransactions;
+        setTransactions(storedTransactions);
       }
     } catch (error) {
       console.error('Error fetching transactions:', error);
-      // Continue with existing transactions if fetch fails
+      // Use localStorage data as fallback
+      if (storedTransactions.length > 0) {
+        currentTransactions = storedTransactions;
+        setTransactions(storedTransactions);
+      }
     }
 
+    console.log('Current transactions for PDF:', currentTransactions);
+
     if (!currentTransactions || currentTransactions.length === 0) {
-      toast.error('No transactions available to generate report');
+      toast.error('No transactions available to generate report. Please add some transactions first.');
       return;
     }
 
@@ -370,7 +434,7 @@ const FinanceSection = () => {
         <div>
           <div className="mb-6 flex justify-between items-center">
             {/* PDF Download Buttons */}
-            <div className="flex space-x-2">
+            <div className="flex space-x-2 flex-wrap gap-2">
               <button
                 onClick={() => generatePDFReport('week')}
                 className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
@@ -391,6 +455,13 @@ const FinanceSection = () => {
               >
                 <FiDownload className="w-4 h-4" />
                 <span>All Transactions</span>
+              </button>
+              <button
+                onClick={addSampleTransactions}
+                className="flex items-center space-x-2 px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition-colors"
+              >
+                <FiPlus className="w-4 h-4" />
+                <span>Add Sample Data</span>
               </button>
             </div>
             
@@ -518,7 +589,7 @@ const FinanceSection = () => {
             </div>
             
             {/* PDF Download Buttons */}
-            <div className="flex space-x-2">
+            <div className="flex space-x-2 flex-wrap gap-2">
               <button
                 onClick={() => generatePDFReport('week')}
                 className="flex items-center space-x-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm transition-colors"
