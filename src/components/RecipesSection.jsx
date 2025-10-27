@@ -357,8 +357,7 @@ const RecipesSection = () => {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="fixed inset-0 z-50 flex items-center justify-center p-4"
-              style={{ pointerEvents: 'none' }}
+              className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto"
               onAnimationStart={() => {
                 // Initialize form state when modal opens
                 if (editingRecipe) {
@@ -375,11 +374,7 @@ const RecipesSection = () => {
                 }
               }}
             >
-              <div 
-                className="w-full max-w-2xl max-h-[90vh] overflow-y-auto"
-                style={{ pointerEvents: 'auto' }}
-              >
-              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6">
+              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 w-full max-w-2xl mx-auto my-8 max-h-[90vh] overflow-y-auto">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
                   {editingRecipe ? 'Edit Recipe' : 'New Recipe'}
                 </h2>
@@ -593,7 +588,6 @@ const RecipesSection = () => {
                     </button>
                   </div>
                 </form>
-              </div>
               </div>
             </motion.div>
           </>
