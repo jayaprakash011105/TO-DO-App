@@ -11,6 +11,7 @@ import { format, startOfWeek, endOfWeek, eachDayOfInterval, subDays } from 'date
 const StatsDashboard = () => {
   const { user } = useAuth();
   const [financialView, setFinancialView] = useState('weekly');
+  const [refreshInterval, setRefreshInterval] = useState(null);
   const [stats, setStats] = useState({
     todayTasks: 0,
     weekTasks: 0,
@@ -37,37 +38,102 @@ const StatsDashboard = () => {
         incomeChange: 0,
         expenseChange: 0
       }
+    },
+    calendarData: {
+      todayEvents: 0,
+      weekEvents: 0,
+      upcomingEvents: []
+    },
+    habitData: {
+      activeHabits: 0,
+      todayCompleted: 0,
+      weeklyCompletion: 0,
+      streaks: []
+    },
+    realTimeData: {
+      lastUpdated: new Date().toISOString(),
+      totalItems: 0,
+      activeProjects: 0
     }
   });
 
   useEffect(() => {
+    // Initial calculation
     calculateStats();
+    
+    // Set up real-time refresh every 5 seconds
+    const interval = setInterval(() => {
+      calculateStats();
+    }, 5000);
+    
+    setRefreshInterval(interval);
+    
+    // Listen for storage changes (when data is updated in other tabs/components)
+    const handleStorageChange = (e) => {
+      if (e.key && e.key.includes(user?.id)) {
+        calculateStats();
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Cleanup
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, [user]);
+  
+  // Also recalculate when financial view changes
+  useEffect(() => {
+    calculateStats();
+  }, [financialView]);
 
   const calculateStats = () => {
+    // Fetch all data from localStorage with real-time sync
     const todos = JSON.parse(localStorage.getItem(`todos_${user?.id}`) || '[]');
     const notes = JSON.parse(localStorage.getItem(`notes_${user?.id}`) || '[]');
     const recipes = JSON.parse(localStorage.getItem(`recipes_${user?.id}`) || '[]');
     const transactions = JSON.parse(localStorage.getItem(`transactions_${user?.id}`) || '[]');
+    const events = JSON.parse(localStorage.getItem(`events_${user?.id}`) || '[]');
+    const habits = JSON.parse(localStorage.getItem(`habits_${user?.id}`) || '[]');
+    const habitLogs = JSON.parse(localStorage.getItem(`habitLogs_${user?.id}`) || '[]');
     
-    // Today's tasks
+    // Today's tasks - count both created today and due today
     const todayString = new Date().toDateString();
-    const todayTasks = todos.filter(t => 
-      new Date(t.createdAt).toDateString() === todayString
-    );
+    const todayTasks = todos.filter(t => {
+      const createdToday = new Date(t.createdAt).toDateString() === todayString;
+      const dueToday = t.dueDate && new Date(t.dueDate).toDateString() === todayString;
+      return createdToday || dueToday;
+    });
+    
+    // Count only incomplete tasks for "Today's Tasks" metric
+    const incompleteTodayTasks = todayTasks.filter(t => !t.completed);
 
-    // This week's tasks
+    // This week's tasks - include both created and due this week
     const weekStart = startOfWeek(new Date());
     const weekEnd = endOfWeek(new Date());
     const weekTasks = todos.filter(t => {
       const taskDate = new Date(t.createdAt);
-      return taskDate >= weekStart && taskDate <= weekEnd;
+      const dueDate = t.dueDate ? new Date(t.dueDate) : null;
+      const createdThisWeek = taskDate >= weekStart && taskDate <= weekEnd;
+      const dueThisWeek = dueDate && dueDate >= weekStart && dueDate <= weekEnd;
+      return createdThisWeek || dueThisWeek;
     });
+    
+    // Count completed tasks this week
+    const completedThisWeek = weekTasks.filter(t => t.completed).length;
 
-    // Completion rate
+    // Completion rate - calculate based on all tasks
     const completedTasks = todos.filter(t => t.completed).length;
-    const completionRate = todos.length > 0 
-      ? Math.round((completedTasks / todos.length) * 100) 
+    const totalTasks = todos.length;
+    const completionRate = totalTasks > 0 
+      ? Math.round((completedTasks / totalTasks) * 100) 
+      : 0;
+    
+    // Weekly completion rate
+    const weeklyCompletionRate = weekTasks.length > 0
+      ? Math.round((completedThisWeek / weekTasks.length) * 100)
       : 0;
 
     // Weekly data for chart
@@ -208,26 +274,77 @@ const StatsDashboard = () => {
       };
     });
     
-    // Category breakdown
+    // Calendar data calculations
+    const todayEvents = events.filter(e => {
+      const eventDate = new Date(e.date);
+      return eventDate.toDateString() === todayString;
+    });
+    
+    const weekEvents = events.filter(e => {
+      const eventDate = new Date(e.date);
+      return eventDate >= weekStart && eventDate <= weekEnd;
+    });
+    
+    const upcomingEvents = events
+      .filter(e => new Date(e.date) >= new Date())
+      .sort((a, b) => new Date(a.date) - new Date(b.date))
+      .slice(0, 3);
+    
+    // Habit data calculations
+    const activeHabits = habits.filter(h => h.isActive !== false).length;
+    const todayHabitLogs = habitLogs.filter(log => 
+      new Date(log.date).toDateString() === todayString
+    );
+    const todayCompletedHabits = todayHabitLogs.filter(log => log.completed).length;
+    
+    // Calculate habit streaks
+    const habitStreaks = habits.map(habit => {
+      const logs = habitLogs
+        .filter(log => log.habitId === habit.id && log.completed)
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+      
+      let streak = 0;
+      const today = new Date();
+      for (let i = 0; i < logs.length; i++) {
+        const logDate = new Date(logs[i].date);
+        const dayDiff = Math.floor((today - logDate) / (1000 * 60 * 60 * 24));
+        if (dayDiff === streak) {
+          streak++;
+        } else {
+          break;
+        }
+      }
+      return { habit: habit.name, streak };
+    }).filter(s => s.streak > 0);
+    
+    // Category breakdown with real counts
     const categoryBreakdown = {
       Tasks: todos.length,
       Notes: notes.length,
       Recipes: recipes.length,
+      Events: events.length,
+      Habits: habits.length,
       Transactions: transactions.length
     };
 
-    // Productivity score (mock calculation)
-    const productivityScore = Math.min(100, 
-      Math.round(completionRate * 0.4 + 
-      (weekTasks.length * 5) + 
-      (notes.length * 2) + 
-      (recipes.length * 3))
+    // Productivity score - based on real metrics
+    const taskScore = completionRate * 0.3; // 30% weight
+    const weeklyScore = weeklyCompletionRate * 0.2; // 20% weight
+    const habitScore = (activeHabits > 0 ? (todayCompletedHabits / activeHabits) * 100 : 0) * 0.2; // 20% weight
+    const activityScore = Math.min(100, (todos.length + notes.length + events.length) * 2) * 0.15; // 15% weight
+    const consistencyScore = (habitStreaks.length > 0 ? Math.min(100, habitStreaks.length * 20) : 0) * 0.15; // 15% weight
+    
+    const productivityScore = Math.round(
+      taskScore + weeklyScore + habitScore + activityScore + consistencyScore
     );
 
+    // Calculate total active items across all categories
+    const totalItems = Object.values(categoryBreakdown).reduce((a, b) => a + b, 0);
+    
     setStats({
-      todayTasks: todayTasks.length,
-      weekTasks: weekTasks.length,
-      completionRate,
+      todayTasks: incompleteTodayTasks.length,
+      weekTasks: weekTasks.filter(t => !t.completed).length,
+      completionRate: weeklyCompletionRate, // Show weekly completion rate as main metric
       productivityScore,
       weeklyData,
       categoryBreakdown,
@@ -250,6 +367,22 @@ const StatsDashboard = () => {
           incomeChange,
           expenseChange
         }
+      },
+      calendarData: {
+        todayEvents: todayEvents.length,
+        weekEvents: weekEvents.length,
+        upcomingEvents
+      },
+      habitData: {
+        activeHabits,
+        todayCompleted: todayCompletedHabits,
+        weeklyCompletion: activeHabits > 0 ? Math.round((todayCompletedHabits / activeHabits) * 100) : 0,
+        streaks: habitStreaks
+      },
+      realTimeData: {
+        lastUpdated: new Date().toISOString(),
+        totalItems,
+        activeProjects: weekTasks.length + weekEvents.length + activeHabits
       }
     });
   };
@@ -287,12 +420,17 @@ const StatsDashboard = () => {
             Analytics Dashboard
           </h2>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
-            Track your productivity and progress
+            Track your productivity and progress • Live sync enabled
           </p>
         </div>
-        <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
-          <FiCalendar className="w-4 h-4" />
-          <span>{format(new Date(), 'MMMM d, yyyy')}</span>
+        <div className="flex flex-col items-end">
+          <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
+            <FiCalendar className="w-4 h-4" />
+            <span>{format(new Date(), 'MMMM d, yyyy')}</span>
+          </div>
+          <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+            Last updated: {format(new Date(stats.realTimeData.lastUpdated), 'HH:mm:ss')}
+          </div>
         </div>
       </div>
 
@@ -302,7 +440,7 @@ const StatsDashboard = () => {
           icon={FiCheckCircle}
           title="Today's Tasks"
           value={stats.todayTasks}
-          subtitle="Keep it up!"
+          subtitle={stats.todayTasks === 0 ? "All done!" : `${stats.todayTasks} pending`}
           color="text-white"
           gradient="from-blue-500 to-blue-600"
         />
@@ -318,15 +456,15 @@ const StatsDashboard = () => {
           icon={FiActivity}
           title="Productivity"
           value={`${stats.productivityScore}%`}
-          subtitle="Great progress!"
+          subtitle={stats.productivityScore >= 70 ? "Excellent!" : stats.productivityScore >= 40 ? "Good progress" : "Keep going!"}
           color="text-white"
           gradient="from-green-500 to-green-600"
         />
         <StatCard
           icon={FiAward}
           title="Total Items"
-          value={Object.values(stats.categoryBreakdown).reduce((a, b) => a + b, 0)}
-          subtitle="Across all categories"
+          value={stats.realTimeData.totalItems}
+          subtitle={`${stats.realTimeData.activeProjects} active projects`}
           color="text-white"
           gradient="from-orange-500 to-orange-600"
         />
@@ -746,6 +884,131 @@ const StatsDashboard = () => {
         </motion.div>
       </div>
 
+      {/* Calendar & Habits Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Calendar Overview */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6"
+        >
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              Calendar Overview
+            </h3>
+            <FiCalendar className="w-5 h-5 text-gray-400" />
+          </div>
+          
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Today's Events</p>
+                <p className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                  {stats.calendarData.todayEvents}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">This Week</p>
+                <p className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                  {stats.calendarData.weekEvents}
+                </p>
+              </div>
+            </div>
+            
+            <div>
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Upcoming Events
+              </p>
+              {stats.calendarData.upcomingEvents.length > 0 ? (
+                <div className="space-y-2">
+                  {stats.calendarData.upcomingEvents.map((event, index) => (
+                    <div key={index} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700/50 rounded">
+                      <div>
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">
+                          {event.title}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          {format(new Date(event.date), 'MMM dd, HH:mm')}
+                        </p>
+                      </div>
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        event.category === 'task' ? 'bg-blue-100 text-blue-600' :
+                        event.category === 'meeting' ? 'bg-green-100 text-green-600' :
+                        event.category === 'deadline' ? 'bg-red-100 text-red-600' :
+                        'bg-gray-100 text-gray-600'
+                      }`}>
+                        {event.category}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-500 dark:text-gray-400">No upcoming events</p>
+              )}
+            </div>
+          </div>
+        </motion.div>
+        
+        {/* Habits Overview */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6"
+        >
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              Habits Tracker
+            </h3>
+            <FiActivity className="w-5 h-5 text-gray-400" />
+          </div>
+          
+          <div className="space-y-4">
+            <div className="grid grid-cols-3 gap-3">
+              <div className="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                  {stats.habitData.activeHabits}
+                </p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">Active</p>
+              </div>
+              <div className="text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                  {stats.habitData.todayCompleted}
+                </p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">Today</p>
+              </div>
+              <div className="text-center p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                  {stats.habitData.weeklyCompletion}%
+                </p>
+                <p className="text-xs text-gray-600 dark:text-gray-400">Weekly</p>
+              </div>
+            </div>
+            
+            <div>
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Current Streaks 🔥
+              </p>
+              {stats.habitData.streaks.length > 0 ? (
+                <div className="space-y-2">
+                  {stats.habitData.streaks.slice(0, 3).map((streak, index) => (
+                    <div key={index} className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700/50 rounded">
+                      <span className="text-sm text-gray-700 dark:text-gray-300">
+                        {streak.habit}
+                      </span>
+                      <span className="text-sm font-bold text-orange-600 dark:text-orange-400">
+                        {streak.streak} days
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-500 dark:text-gray-400">Start building streaks!</p>
+              )}
+            </div>
+          </div>
+        </motion.div>
+      </div>
+      
       {/* Motivational Quote */}
       <motion.div
         initial={{ opacity: 0 }}
