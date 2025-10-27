@@ -5,12 +5,15 @@ import { useTheme } from '../contexts/ThemeContext';
 import TodoSection from '../components/TodoSection';
 import NotesSection from '../components/NotesSection';
 import RecipesSection from '../components/RecipesSection';
+import RecipeForm from '../components/RecipeForm';
 import FinanceSection from '../components/FinanceSection';
 import UserProfile from '../components/UserProfile';
 import StatsDashboard from '../components/StatsDashboard';
 import PomodoroTimer from '../components/PomodoroTimer';
 import CalendarView from '../components/CalendarView';
 import HabitTracker from '../components/HabitTracker';
+import { recipeService } from '../services/api';
+import toast from 'react-hot-toast';
 import { 
   FiLogOut, FiSun, FiMoon, FiCheckSquare, FiFileText, 
   FiBook, FiDollarSign, FiUser, FiSearch, FiBarChart2,
@@ -18,7 +21,6 @@ import {
   FiCalendar, FiTarget
 } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
-import toast from 'react-hot-toast';
 
 const DashboardNew = () => {
   const { user, logout } = useAuth();
@@ -29,7 +31,34 @@ const DashboardNew = () => {
   const [showSearch, setShowSearch] = useState(false);
   const [notifications, setNotifications] = useState(3);
   const [showPomodoro, setShowPomodoro] = useState(false);
+  const [recipeFormOpen, setRecipeFormOpen] = useState(false);
+  const [editingRecipe, setEditingRecipe] = useState(null);
+  const [recipes, setRecipes] = useState([]);
   const navigate = useNavigate();
+
+  // Recipe form handlers
+  const handleRecipeSubmit = async (recipeData) => {
+    try {
+      if (editingRecipe) {
+        const updated = await recipeService.updateRecipe(editingRecipe.id, recipeData);
+        setRecipes(recipes.map(r => r.id === updated.id ? updated : r));
+        toast.success('Recipe updated successfully!');
+      } else {
+        const newRecipe = await recipeService.createRecipe(recipeData);
+        setRecipes([newRecipe, ...recipes]);
+        toast.success('Recipe created successfully!');
+      }
+      setRecipeFormOpen(false);
+      setEditingRecipe(null);
+    } catch (error) {
+      toast.error('Failed to save recipe');
+    }
+  };
+
+  const openRecipeForm = (recipe = null) => {
+    setEditingRecipe(recipe);
+    setRecipeFormOpen(true);
+  };
 
   const tabs = [
     { id: 'stats', label: 'Dashboard', icon: FiBarChart2 },
@@ -298,11 +327,29 @@ const DashboardNew = () => {
           {activeTab === 'calendar' && <CalendarView />}
           {activeTab === 'habits' && <HabitTracker />}
           {activeTab === 'notes' && <NotesSection />}
-          {activeTab === 'recipes' && <RecipesSection />}
+          {activeTab === 'recipes' && (
+            <RecipesSection 
+              onOpenForm={openRecipeForm}
+              recipes={recipes}
+              setRecipes={setRecipes}
+            />
+          )}
           {activeTab === 'finance' && <FinanceSection />}
         </motion.div>
       </main>
+
+      {/* Recipe Form Modal - Rendered outside main container */}
+      <RecipeForm
+        isOpen={recipeFormOpen}
+        onClose={() => {
+          setRecipeFormOpen(false);
+          setEditingRecipe(null);
+        }}
+        onSubmit={handleRecipeSubmit}
+        editingRecipe={editingRecipe}
+      />
     </div>
   );
 };
+
 export default DashboardNew;

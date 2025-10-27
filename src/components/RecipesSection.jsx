@@ -3,14 +3,10 @@ import { FiPlus, FiEdit2, FiTrash2, FiSearch, FiClock, FiUsers } from 'react-ico
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { recipeService } from '../services/api';
-import RecipeForm from './RecipeForm';
 
-const RecipesSection = () => {
-  const [recipes, setRecipes] = useState([]);
+const RecipesSection = ({ onOpenForm, recipes, setRecipes }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingRecipe, setEditingRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
   const [servingMultipliers, setServingMultipliers] = useState({});
 
@@ -29,23 +25,6 @@ const RecipesSection = () => {
     }
   };
 
-  const handleSubmit = async (recipeData) => {
-    try {
-      if (editingRecipe) {
-        const updated = await recipeService.updateRecipe(editingRecipe.id, recipeData);
-        setRecipes(recipes.map(r => r.id === updated.id ? updated : r));
-        toast.success('Recipe updated successfully!');
-      } else {
-        const newRecipe = await recipeService.createRecipe(recipeData);
-        setRecipes([newRecipe, ...recipes]);
-        toast.success('Recipe created successfully!');
-      }
-      setIsFormOpen(false);
-      setEditingRecipe(null);
-    } catch (error) {
-      toast.error('Failed to save recipe');
-    }
-  };
 
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this recipe?')) return;
@@ -108,10 +87,7 @@ const RecipesSection = () => {
             </select>
           </div>
           <button
-            onClick={() => {
-              setEditingRecipe(null);
-              setIsFormOpen(true);
-            }}
+            onClick={() => onOpenForm(null)}
             className="btn-primary flex items-center space-x-2"
           >
             <FiPlus className="w-5 h-5" />
@@ -149,10 +125,7 @@ const RecipesSection = () => {
                     </div>
                     <div className="flex space-x-2">
                       <button
-                        onClick={() => {
-                          setEditingRecipe(recipe);
-                          setIsFormOpen(true);
-                        }}
+                        onClick={() => onOpenForm(recipe)}
                         className="p-2 text-gray-500 hover:text-primary-600 dark:hover:text-primary-400"
                       >
                         <FiEdit2 className="w-4 h-4" />
@@ -323,16 +296,6 @@ const RecipesSection = () => {
         </div>
       )}
 
-      {/* Recipe Form Component - Renders as overlay */}
-      <RecipeForm
-        isOpen={isFormOpen}
-        onClose={() => {
-          setIsFormOpen(false);
-          setEditingRecipe(null);
-        }}
-        onSubmit={handleSubmit}
-        editingRecipe={editingRecipe}
-      />
     </div>
   );
 };
