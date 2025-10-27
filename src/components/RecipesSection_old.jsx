@@ -13,6 +13,13 @@ const RecipesSection = () => {
   const [editingRecipe, setEditingRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
   const [servingMultipliers, setServingMultipliers] = useState({});
+  const [formNutrients, setFormNutrients] = useState({
+    calories: 0,
+    protein: 0,
+    carbs: 0,
+    fat: 0
+  });
+  const [formServings, setFormServings] = useState(1);
 
   useEffect(() => {
     fetchRecipes();
@@ -29,7 +36,23 @@ const RecipesSection = () => {
     }
   };
 
-  const handleSubmit = async (recipeData) => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const recipeData = {
+      name: formData.get('name'),
+      ingredients: formData.get('ingredients'),
+      instructions: formData.get('instructions'),
+      prep_time: parseInt(formData.get('prep_time')) || null,
+      cook_time: parseInt(formData.get('cook_time')) || null,
+      servings: parseInt(formData.get('servings')) || 1,
+      calories: parseFloat(formData.get('calories')) || null,
+      protein: parseFloat(formData.get('protein')) || null,
+      carbs: parseFloat(formData.get('carbs')) || null,
+      fat: parseFloat(formData.get('fat')) || null,
+      category: formData.get('category'),
+    };
+
     try {
       if (editingRecipe) {
         const updated = await recipeService.updateRecipe(editingRecipe.id, recipeData);
@@ -323,16 +346,264 @@ const RecipesSection = () => {
         </div>
       )}
 
-      {/* Recipe Form Component - Renders as overlay */}
-      <RecipeForm
-        isOpen={isFormOpen}
-        onClose={() => {
-          setIsFormOpen(false);
-          setEditingRecipe(null);
-        }}
-        onSubmit={handleSubmit}
-        editingRecipe={editingRecipe}
-      />
+      {/* Recipe Form Modal */}
+      <AnimatePresence>
+        {isFormOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black bg-opacity-50 z-40"
+              onClick={() => setIsFormOpen(false)}
+            />
+            {/* Modal - Centered */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto"
+              onAnimationStart={() => {
+                // Initialize form state when modal opens
+                if (editingRecipe) {
+                  setFormNutrients({
+                    calories: editingRecipe.calories || 0,
+                    protein: editingRecipe.protein || 0,
+                    carbs: editingRecipe.carbs || 0,
+                    fat: editingRecipe.fat || 0
+                  });
+                  setFormServings(editingRecipe.servings || 1);
+                } else {
+                  setFormNutrients({ calories: 0, protein: 0, carbs: 0, fat: 0 });
+                  setFormServings(1);
+                }
+              }}
+            >
+              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-3xl mx-auto my-8 max-h-[90vh] overflow-y-auto">
+                <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 z-10">
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {editingRecipe ? 'Edit Recipe' : 'New Recipe'}
+                  </h2>
+                </div>
+                <form onSubmit={handleSubmit} className="p-6 space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Recipe Name
+                      </label>
+                      <input
+                        type="text"
+                        name="name"
+                        defaultValue={editingRecipe?.name}
+                        required
+                        className="input-field"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Category
+                      </label>
+                      <select
+                        name="category"
+                        defaultValue={editingRecipe?.category || ''}
+                        className="input-field"
+                      >
+                        <option value="">Select Category</option>
+                        <option value="breakfast">Breakfast</option>
+                        <option value="lunch">Lunch</option>
+                        <option value="dinner">Dinner</option>
+                        <option value="snack">Snack</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Ingredients (one per line)
+                    </label>
+                    <textarea
+                      name="ingredients"
+                      rows="4"
+                      defaultValue={editingRecipe?.ingredients}
+                      required
+                      placeholder="1 cup flour&#10;2 eggs&#10;1/2 cup milk"
+                      className="input-field resize-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Instructions
+                    </label>
+                    <textarea
+                      name="instructions"
+                      rows="4"
+                      defaultValue={editingRecipe?.instructions}
+                      required
+                      className="input-field resize-none"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Prep Time (min)
+                      </label>
+                      <input
+                        type="number"
+                        name="prep_time"
+                        defaultValue={editingRecipe?.prep_time}
+                        min="0"
+                        className="input-field"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Cook Time (min)
+                      </label>
+                      <input
+                        type="number"
+                        name="cook_time"
+                        defaultValue={editingRecipe?.cook_time}
+                        min="0"
+                        className="input-field"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Servings
+                      </label>
+                      <input
+                        type="number"
+                        name="servings"
+                        value={formServings}
+                        onChange={(e) => setFormServings(parseInt(e.target.value) || 1)}
+                        min="1"
+                        className="input-field"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Nutrition Information</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                      Enter total nutrition for the entire recipe. Per-serving values are calculated automatically.
+                    </p>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          Total Calories
+                        </label>
+                        <input
+                          type="number"
+                          name="calories"
+                          value={formNutrients.calories}
+                          onChange={(e) => setFormNutrients({...formNutrients, calories: parseFloat(e.target.value) || 0})}
+                          min="0"
+                          step="0.1"
+                          className="input-field"
+                        />
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          Per serving: {Math.round(formNutrients.calories / formServings)}
+                        </span>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          Total Protein (g)
+                        </label>
+                        <input
+                          type="number"
+                          name="protein"
+                          value={formNutrients.protein}
+                          onChange={(e) => setFormNutrients({...formNutrients, protein: parseFloat(e.target.value) || 0})}
+                          min="0"
+                          step="0.1"
+                          className="input-field"
+                        />
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          Per serving: {Math.round(formNutrients.protein / formServings * 10) / 10}g
+                        </span>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          Total Carbs (g)
+                        </label>
+                        <input
+                          type="number"
+                          name="carbs"
+                          value={formNutrients.carbs}
+                          onChange={(e) => setFormNutrients({...formNutrients, carbs: parseFloat(e.target.value) || 0})}
+                          min="0"
+                          step="0.1"
+                          className="input-field"
+                        />
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          Per serving: {Math.round(formNutrients.carbs / formServings * 10) / 10}g
+                        </span>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          Total Fat (g)
+                        </label>
+                        <input
+                          type="number"
+                          name="fat"
+                          value={formNutrients.fat}
+                          onChange={(e) => setFormNutrients({...formNutrients, fat: parseFloat(e.target.value) || 0})}
+                          min="0"
+                          step="0.1"
+                          className="input-field"
+                        />
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          Per serving: {Math.round(formNutrients.fat / formServings * 10) / 10}g
+                        </span>
+                      </div>
+                    </div>
+                    
+                    {/* Live Nutrition Summary */}
+                    <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                      <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                        Nutrition Summary for {formServings} serving{formServings > 1 ? 's' : ''}:
+                      </h4>
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div className="text-gray-600 dark:text-gray-400">
+                          <span className="font-medium">Total Recipe:</span> {Math.round(formNutrients.calories)} cal
+                        </div>
+                        <div className="text-gray-600 dark:text-gray-400">
+                          <span className="font-medium">Per Serving:</span> {Math.round(formNutrients.calories / formServings)} cal
+                        </div>
+                        <div className="text-gray-600 dark:text-gray-400">
+                          <span className="font-medium">Macros Total:</span> {formNutrients.protein}g P | {formNutrients.carbs}g C | {formNutrients.fat}g F
+                        </div>
+                        <div className="text-gray-600 dark:text-gray-400">
+                          <span className="font-medium">Macros/Serving:</span> {Math.round(formNutrients.protein / formServings * 10) / 10}g P | {Math.round(formNutrients.carbs / formServings * 10) / 10}g C | {Math.round(formNutrients.fat / formServings * 10) / 10}g F
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200 dark:border-gray-700">
+                    <button
+                      type="button"
+                      onClick={() => setIsFormOpen(false)}
+                      className="px-6 py-2.5 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-xl font-medium transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl font-medium shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30 transition-all"
+                    >
+                      {editingRecipe ? 'Update Recipe' : 'Create Recipe'}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
