@@ -96,19 +96,19 @@ const RecipeForm = ({ isOpen, onClose, onSubmit, editingRecipe }) => {
             className="fixed inset-0 bg-black bg-opacity-50 z-40"
             onClick={onClose}
           />
-          {/* Modal - Centered like TodoForm */}
+          {/* Modal - Centered with proper spacing */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            initial={{ opacity: 0, scale: 0.9, y: -20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: -20 }}
+            className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto"
             style={{ pointerEvents: 'none' }}
           >
             <div 
-              className="w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+              className="w-full max-w-2xl my-8 min-h-0"
               style={{ pointerEvents: 'auto' }}
             >
-              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6">
+              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 max-h-[calc(100vh-4rem)] overflow-y-auto">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                     {editingRecipe ? 'Edit Recipe' : 'New Recipe'}
