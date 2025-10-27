@@ -31,25 +31,25 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-primary-100 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center px-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="max-w-md w-full"
       >
-        <div className="bg-white rounded-2xl shadow-xl p-8">
+        <div className="glass-effect backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-white/20">
           <div className="text-center mb-8">
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-              className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-full mb-4"
+              className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full mb-4 shadow-2xl shadow-blue-500/30"
             >
-              <FiLogIn className="w-8 h-8 text-primary-600" />
+              <FiLogIn className="w-10 h-10 text-white" />
             </motion.div>
-            <h2 className="text-3xl font-bold text-gray-900">Welcome Back!</h2>
-            <p className="text-gray-600 mt-2">Sign in to manage your tasks</p>
+            <h2 className="text-3xl font-bold gradient-text">Welcome Back!</h2>
+            <p className="text-gray-600 dark:text-gray-400 mt-2">Sign in to manage your tasks</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -67,7 +67,7 @@ const Login = () => {
                   value={formData.username}
                   onChange={handleChange}
                   required
-                  className="input-field pl-10"
+                  className="input-field pl-10 transition-all duration-300"
                   placeholder="Enter your username"
                 />
               </div>
@@ -87,7 +87,7 @@ const Login = () => {
                   value={formData.password}
                   onChange={handleChange}
                   required
-                  className="input-field pl-10"
+                  className="input-field pl-10 transition-all duration-300"
                   placeholder="Enter your password"
                 />
               </div>
@@ -96,7 +96,7 @@ const Login = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full btn-primary py-3 flex items-center justify-center space-x-2"
+              className="w-full btn-primary py-3 flex items-center justify-center space-x-2 text-lg"
             >
               {loading ? (
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
@@ -114,7 +114,7 @@ const Login = () => {
               Don't have an account?{' '}
               <Link
                 to="/register"
-                className="text-primary-600 hover:text-primary-700 font-medium"
+                className="gradient-text hover:opacity-80 font-semibold transition-opacity"
               >
                 Sign up
               </Link>
