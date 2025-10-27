@@ -3,6 +3,7 @@ import { FiPlus, FiEdit2, FiTrash2, FiSearch, FiClock, FiUsers } from 'react-ico
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { recipeService } from '../services/api';
+import RecipeForm from './RecipeForm';
 
 const RecipesSection = () => {
   const [recipes, setRecipes] = useState([]);
@@ -56,11 +57,11 @@ const RecipesSection = () => {
       if (editingRecipe) {
         const updated = await recipeService.updateRecipe(editingRecipe.id, recipeData);
         setRecipes(recipes.map(r => r.id === updated.id ? updated : r));
-        toast.success('Recipe updated');
+        toast.success('Recipe updated successfully!');
       } else {
         const newRecipe = await recipeService.createRecipe(recipeData);
         setRecipes([newRecipe, ...recipes]);
-        toast.success('Recipe created');
+        toast.success('Recipe created successfully!');
       }
       setIsFormOpen(false);
       setEditingRecipe(null);
