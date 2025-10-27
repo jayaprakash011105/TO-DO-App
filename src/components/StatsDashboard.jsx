@@ -51,9 +51,9 @@ const StatsDashboard = () => {
     const transactions = JSON.parse(localStorage.getItem(`transactions_${user?.id}`) || '[]');
     
     // Today's tasks
-    const today = new Date().toDateString();
+    const todayString = new Date().toDateString();
     const todayTasks = todos.filter(t => 
-      new Date(t.createdAt).toDateString() === today
+      new Date(t.createdAt).toDateString() === todayString
     );
 
     // This week's tasks
