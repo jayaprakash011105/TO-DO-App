@@ -72,40 +72,50 @@ const FinanceSection = () => {
   }, []);
 
   const generatePDFReport = async (period = 'week', includeAll = false) => {
-    // Directly fetch from localStorage to ensure we have the latest data
+    // Force refresh data before generating report
+    await fetchData();
+    
+    // Get the absolute latest data directly from localStorage
     let currentTransactions = [];
     
-    try {
-      // First try to get directly from localStorage
-      currentTransactions = financeStorage.getTransactions();
-      console.log('Fetched from localStorage:', currentTransactions);
-      
-      // Update the state with the latest data
-      if (currentTransactions && currentTransactions.length > 0) {
-        setTransactions(currentTransactions);
-      }
-    } catch (error) {
-      console.error('Error fetching transactions from localStorage:', error);
-      
-      // Fallback to API service
+    // Direct localStorage access to ensure we have the most current data
+    const storageKey = 'todo_app_transactions';
+    const rawData = localStorage.getItem(storageKey);
+    
+    if (rawData) {
       try {
-        const transactionsData = await financeService.getTransactions();
-        if (transactionsData && transactionsData.length > 0) {
-          currentTransactions = transactionsData;
-          setTransactions(transactionsData);
-        }
-      } catch (apiError) {
-        console.error('Error fetching transactions from API:', apiError);
+        const allTransactions = JSON.parse(rawData);
+        const currentUser = JSON.parse(localStorage.getItem('todo_app_current_user') || '{}');
+        
+        // Filter for current user's transactions
+        currentTransactions = allTransactions.filter(t => t.userId === currentUser.id);
+        
+        console.log('=== PDF Report Data Fetch ===');
+        console.log('Total transactions in storage:', allTransactions.length);
+        console.log('Current user ID:', currentUser.id);
+        console.log('User transactions found:', currentTransactions.length);
+        console.log('Transaction dates:', currentTransactions.map(t => ({ 
+          date: t.date, 
+          amount: t.amount, 
+          type: t.type,
+          description: t.description 
+        })));
+        
+        // Update component state with latest data
+        setTransactions(currentTransactions);
+      } catch (error) {
+        console.error('Error parsing localStorage data:', error);
+        toast.error('Error reading transaction data');
+        return;
       }
-    }
-
-    // Final check - also look at state if nothing found
-    if ((!currentTransactions || currentTransactions.length === 0) && transactions.length > 0) {
-      currentTransactions = transactions;
+    } else {
+      console.log('No transactions found in localStorage');
+      toast.error('No transactions found. Please add some transactions first.');
+      return;
     }
 
     if (!currentTransactions || currentTransactions.length === 0) {
-      toast.error('No transactions available to generate report. Please add some transactions first.');
+      toast.error('No transactions available for your account. Please add some transactions first.');
       return;
     }
 
@@ -138,20 +148,33 @@ const FinanceSection = () => {
 
       // Filter transactions for the period
       periodTransactions = currentTransactions.filter(t => {
-        if (!t.date) return false;
+        if (!t.date) {
+          console.log('Transaction missing date:', t);
+          return false;
+        }
+        
+        // Parse the transaction date
         const transDate = new Date(t.date);
+        
         // Check if date is valid
-        if (isNaN(transDate.getTime())) return false;
+        if (isNaN(transDate.getTime())) {
+          console.log('Invalid date for transaction:', t);
+          return false;
+        }
         
-        // Compare dates without time component
-        const transDateOnly = new Date(format(transDate, 'yyyy-MM-dd'));
-        const startDateOnly = new Date(format(startDate, 'yyyy-MM-dd'));
-        const endDateOnly = new Date(format(endDate, 'yyyy-MM-dd'));
+        // For weekly/monthly reports, use date-fns isWithinInterval for accurate filtering
+        const isInPeriod = isWithinInterval(transDate, { start: startDate, end: endDate });
         
-        return transDateOnly >= startDateOnly && transDateOnly <= endDateOnly;
+        console.log(`Transaction date ${format(transDate, 'yyyy-MM-dd')} is ${isInPeriod ? 'WITHIN' : 'OUTSIDE'} period ${format(startDate, 'yyyy-MM-dd')} to ${format(endDate, 'yyyy-MM-dd')}`);
+        
+        return isInPeriod;
       });
     }
 
+    console.log('=== Filtered Results ===');
+    console.log('Period:', periodText);
+    console.log('Date range:', format(startDate, 'MMM dd, yyyy'), 'to', format(endDate, 'MMM dd, yyyy'));
+    console.log('Transactions in period:', periodTransactions.length);
     console.log('Filtered transactions:', periodTransactions);
 
     // Calculate totals
@@ -265,15 +288,22 @@ const FinanceSection = () => {
 
   const fetchData = async () => {
     try {
+      // Always fetch fresh data from localStorage/API
       const [transactionsData, budgetsData, summaryData] = await Promise.all([
         financeService.getTransactions(),
         financeService.getBudgets(),
         financeService.getFinancialSummary(filterPeriod)
       ]);
+      
+      console.log('fetchData - Transactions loaded:', transactionsData.length);
       setTransactions(transactionsData);
       setBudgets(budgetsData);
       setSummary(summaryData);
+      
+      // Force a re-render
+      return transactionsData;
     } catch (error) {
+      console.error('Failed to fetch financial data:', error);
       toast.error('Failed to fetch financial data');
     } finally {
       setLoading(false);
@@ -421,7 +451,14 @@ const FinanceSection = () => {
             {/* PDF Download Buttons */}
             <div className="flex space-x-2">
               <button
-                onClick={() => generatePDFReport('week')}
+                onClick={async () => {
+                  toast.loading('Refreshing data...');
+                  await fetchData();
+                  setTimeout(() => {
+                    toast.dismiss();
+                    generatePDFReport('week');
+                  }, 500);
+                }}
                 className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
               >
                 <FiDownload className="w-4 h-4" />
