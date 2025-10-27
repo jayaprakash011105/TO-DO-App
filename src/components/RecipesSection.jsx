@@ -81,20 +81,25 @@ const RecipesSection = () => {
   };
 
   const filteredRecipes = recipes.filter(recipe => {
-    const matchesSearch = recipe.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      recipe.ingredients.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = (recipe.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (recipe.ingredients || '').toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = categoryFilter === 'all' || recipe.category === categoryFilter;
     return matchesSearch && matchesCategory;
   });
 
-  const NutritionBadge = ({ label, value, unit, color }) => (
-    <div className={`flex flex-col items-center p-2 bg-${color}-50 dark:bg-${color}-900/20 rounded-lg`}>
-      <span className={`text-lg font-bold text-${color}-600 dark:text-${color}-400`}>
-        {value || 0}{unit}
-      </span>
-      <span className="text-xs text-gray-600 dark:text-gray-400">{label}</span>
-    </div>
-  );
+  const NutritionBadge = ({ label, value, unit, color }) => {
+    const bgColorClass = `bg-${color}-50 dark:bg-${color}-900/20`;
+    const textColorClass = `text-${color}-600 dark:text-${color}-400`;
+
+    return (
+      <div className={`${bgColorClass} flex flex-col items-center p-2 rounded-lg`}>
+        <span className={`${textColorClass} text-lg font-bold`}>
+          {value || 0}{unit}
+        </span>
+        <span className="text-xs text-gray-600 dark:text-gray-400">{label}</span>
+      </div>
+    );
+  };
 
   return (
     <div>
