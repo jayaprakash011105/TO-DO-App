@@ -1,0 +1,78 @@
+/* Tailwind CSS Directives - These are processed by PostCSS */
+/* @tailwind directives are special Tailwind CSS instructions */
+/* If your editor shows errors for @apply, @tailwind, etc., ignore them - these are PostCSS directives */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom Base Styles */
+@layer base {
+  html {
+    /* Ensure full height for proper modal centering */
+    @apply h-full;
+  }
+  
+  body {
+    /* Equivalent to: bg-gray-50 text-gray-900 antialiased */
+    @apply bg-gray-50 text-gray-900 antialiased h-full;
+  }
+  
+  #root {
+    /* Ensure root element takes full height */
+    @apply h-full;
+  }
+  
+  .dark body {
+    /* Dark mode body styles */
+    @apply bg-gray-900 text-gray-100;
+  }
+}
+
+/* Custom Component Classes */
+@layer components {
+  /* Primary button styles */
+  .btn-primary {
+    @apply bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors duration-200 font-medium shadow-sm;
+  }
+  
+  .dark .btn-primary {
+    @apply bg-primary-500 hover:bg-primary-600;
+  }
+  
+  /* Secondary button styles */
+  .btn-secondary {
+    @apply bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors duration-200 font-medium;
+  }
+  
+  .dark .btn-secondary {
+    @apply bg-gray-700 text-gray-200 hover:bg-gray-600;
+  }
+  
+  /* Input field styles */
+  .input-field {
+    @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200;
+  }
+  
+  .dark .input-field {
+    @apply bg-gray-800 border-gray-600 text-white;
+  }
+  
+  /* Card component styles */
+  .card {
+    @apply bg-white rounded-xl shadow-sm border border-gray-100 p-6;
+  }
+  
+  .dark .card {
+    @apply bg-gray-800 border-gray-700;
+  }
+  
+  /* Modal centering utility */
+  .modal-center {
+    @apply fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto;
+  }
+  
+  /* Modal content wrapper */
+  .modal-content {
+    @apply relative my-8 mx-auto;
+  }
+}
