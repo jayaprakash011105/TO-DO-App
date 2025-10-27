@@ -35,26 +35,75 @@ const FinanceSection = () => {
     fetchData();
   }, [filterPeriod]);
 
-  const generatePDFReport = (period = 'week') => {
+  // Fetch data on mount
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const generatePDFReport = async (period = 'week', includeAll = false) => {
+    // Always fetch latest transactions for the report
+    let currentTransactions = transactions;
+    
+    try {
+      const transactionsData = await financeService.getTransactions();
+      if (transactionsData && transactionsData.length > 0) {
+        currentTransactions = transactionsData;
+        setTransactions(transactionsData);
+      }
+    } catch (error) {
+      console.error('Error fetching transactions:', error);
+      // Continue with existing transactions if fetch fails
+    }
+
+    if (!currentTransactions || currentTransactions.length === 0) {
+      toast.error('No transactions available to generate report');
+      return;
+    }
+
     const doc = new jsPDF();
     const now = new Date();
     let startDate, endDate, periodText;
+    let periodTransactions;
 
-    if (period === 'week') {
-      startDate = startOfWeek(now, { weekStartsOn: 1 });
-      endDate = endOfWeek(now, { weekStartsOn: 1 });
-      periodText = 'Weekly';
+    if (includeAll) {
+      periodText = 'All';
+      periodTransactions = currentTransactions;
+      startDate = new Date(Math.min(...currentTransactions.map(t => new Date(t.date))));
+      endDate = new Date(Math.max(...currentTransactions.map(t => new Date(t.date))));
     } else {
-      startDate = startOfMonth(now);
-      endDate = endOfMonth(now);
-      periodText = 'Monthly';
+      if (period === 'week') {
+        startDate = startOfWeek(now, { weekStartsOn: 1 });
+        endDate = endOfWeek(now, { weekStartsOn: 1 });
+        periodText = 'Weekly';
+      } else {
+        startDate = startOfMonth(now);
+        endDate = endOfMonth(now);
+        periodText = 'Monthly';
+      }
+
+      console.log('Report period:', { 
+        startDate: format(startDate, 'yyyy-MM-dd'), 
+        endDate: format(endDate, 'yyyy-MM-dd') 
+      });
+      console.log('Available transactions:', currentTransactions);
+
+      // Filter transactions for the period
+      periodTransactions = currentTransactions.filter(t => {
+        if (!t.date) return false;
+        const transDate = new Date(t.date);
+        // Check if date is valid
+        if (isNaN(transDate.getTime())) return false;
+        
+        // Compare dates without time component
+        const transDateOnly = new Date(format(transDate, 'yyyy-MM-dd'));
+        const startDateOnly = new Date(format(startDate, 'yyyy-MM-dd'));
+        const endDateOnly = new Date(format(endDate, 'yyyy-MM-dd'));
+        
+        return transDateOnly >= startDateOnly && transDateOnly <= endDateOnly;
+      });
     }
 
-    // Filter transactions for the period
-    const periodTransactions = transactions.filter(t => {
-      const transDate = new Date(t.date);
-      return isWithinInterval(transDate, { start: startDate, end: endDate });
-    });
+    console.log('Filtered transactions:', periodTransactions);
 
     // Calculate totals
     const totalIncome = periodTransactions
@@ -335,6 +384,13 @@ const FinanceSection = () => {
               >
                 <FiDownload className="w-4 h-4" />
                 <span>Monthly Report</span>
+              </button>
+              <button
+                onClick={() => generatePDFReport('all', true)}
+                className="flex items-center space-x-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
+              >
+                <FiDownload className="w-4 h-4" />
+                <span>All Transactions</span>
               </button>
             </div>
             
