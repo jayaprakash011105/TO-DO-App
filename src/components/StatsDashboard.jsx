@@ -4,9 +4,12 @@ import { motion } from 'framer-motion';
 import { 
   FiTrendingUp, FiActivity, FiPieChart, FiBarChart2,
   FiCheckCircle, FiClock, FiCalendar, FiAward,
-  FiDollarSign, FiArrowUp, FiArrowDown, FiCreditCard
+  FiDollarSign, FiArrowUp, FiArrowDown, FiCreditCard,
+  FiDatabase, FiRefreshCw
 } from 'react-icons/fi';
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, subDays } from 'date-fns';
+import { populateSampleData, clearUserData } from '../utils/sampleData';
+import toast from 'react-hot-toast';
 
 const StatsDashboard = () => {
   const { user } = useAuth();
@@ -91,13 +94,25 @@ const StatsDashboard = () => {
 
   const calculateStats = () => {
     // Fetch all data from localStorage with real-time sync
-    const todos = JSON.parse(localStorage.getItem(`todos_${user?.id}`) || '[]');
-    const notes = JSON.parse(localStorage.getItem(`notes_${user?.id}`) || '[]');
-    const recipes = JSON.parse(localStorage.getItem(`recipes_${user?.id}`) || '[]');
-    const transactions = JSON.parse(localStorage.getItem(`transactions_${user?.id}`) || '[]');
-    const events = JSON.parse(localStorage.getItem(`events_${user?.id}`) || '[]');
-    const habits = JSON.parse(localStorage.getItem(`habits_${user?.id}`) || '[]');
-    const habitLogs = JSON.parse(localStorage.getItem(`habitLogs_${user?.id}`) || '[]');
+    // Using the actual storage keys from localStorage.js
+    const allTodos = JSON.parse(localStorage.getItem('todo_app_todos') || '[]');
+    const allNotes = JSON.parse(localStorage.getItem('todo_app_notes') || '[]');
+    const allRecipes = JSON.parse(localStorage.getItem('todo_app_recipes') || '[]');
+    const allTransactions = JSON.parse(localStorage.getItem('todo_app_transactions') || '[]');
+    
+    // Filter by current user if user exists
+    const todos = user?.id ? allTodos.filter(t => t.userId === user.id) : allTodos;
+    const notes = user?.id ? allNotes.filter(n => n.userId === user.id) : allNotes;
+    const recipes = user?.id ? allRecipes.filter(r => r.userId === user.id) : allRecipes;
+    const transactions = user?.id ? allTransactions.filter(t => t.userId === user.id) : allTransactions;
+    
+    // Calendar and habits might be stored differently, check for them
+    const events = JSON.parse(localStorage.getItem(`events_${user?.id}`) || 
+                              localStorage.getItem('todo_app_events') || '[]');
+    const habits = JSON.parse(localStorage.getItem(`habits_${user?.id}`) || 
+                             localStorage.getItem('todo_app_habits') || '[]');
+    const habitLogs = JSON.parse(localStorage.getItem(`habitLogs_${user?.id}`) || 
+                                localStorage.getItem('todo_app_habit_logs') || '[]');
     
     // Today's tasks - count both created today and due today
     const todayString = new Date().toDateString();
@@ -424,6 +439,32 @@ const StatsDashboard = () => {
           </p>
         </div>
         <div className="flex flex-col items-end">
+          <div className="flex items-center space-x-2 mb-2">
+            <button
+              onClick={() => {
+                if (populateSampleData()) {
+                  toast.success('Sample data added successfully!');
+                  calculateStats();
+                } else {
+                  toast.error('Please login first');
+                }
+              }}
+              className="px-3 py-1 text-xs bg-green-500 text-white rounded-lg hover:bg-green-600 flex items-center space-x-1"
+            >
+              <FiDatabase className="w-3 h-3" />
+              <span>Add Sample Data</span>
+            </button>
+            <button
+              onClick={() => {
+                calculateStats();
+                toast.success('Dashboard refreshed!');
+              }}
+              className="px-3 py-1 text-xs bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center space-x-1"
+            >
+              <FiRefreshCw className="w-3 h-3" />
+              <span>Refresh</span>
+            </button>
+          </div>
           <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
             <FiCalendar className="w-4 h-4" />
             <span>{format(new Date(), 'MMMM d, yyyy')}</span>
