@@ -374,11 +374,13 @@ const RecipesSection = () => {
                 }
               }}
             >
-              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 w-full max-w-2xl mx-auto my-8 max-h-[90vh] overflow-y-auto">
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-                  {editingRecipe ? 'Edit Recipe' : 'New Recipe'}
-                </h2>
-                <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-3xl mx-auto my-8 max-h-[90vh] overflow-y-auto">
+                <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 z-10">
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {editingRecipe ? 'Edit Recipe' : 'New Recipe'}
+                  </h2>
+                </div>
+                <form onSubmit={handleSubmit} className="p-6 space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -389,7 +391,7 @@ const RecipesSection = () => {
                         name="name"
                         defaultValue={editingRecipe?.name}
                         required
-                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        className="input-field"
                       />
                     </div>
                     <div>
@@ -399,7 +401,7 @@ const RecipesSection = () => {
                       <select
                         name="category"
                         defaultValue={editingRecipe?.category || ''}
-                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        className="input-field"
                       >
                         <option value="">Select Category</option>
                         <option value="breakfast">Breakfast</option>
@@ -420,7 +422,7 @@ const RecipesSection = () => {
                       defaultValue={editingRecipe?.ingredients}
                       required
                       placeholder="1 cup flour&#10;2 eggs&#10;1/2 cup milk"
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      className="input-field resize-none"
                     />
                   </div>
 
@@ -433,7 +435,7 @@ const RecipesSection = () => {
                       rows="4"
                       defaultValue={editingRecipe?.instructions}
                       required
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      className="input-field resize-none"
                     />
                   </div>
 
@@ -447,7 +449,7 @@ const RecipesSection = () => {
                         name="prep_time"
                         defaultValue={editingRecipe?.prep_time}
                         min="0"
-                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        className="input-field"
                       />
                     </div>
                     <div>
@@ -459,7 +461,7 @@ const RecipesSection = () => {
                         name="cook_time"
                         defaultValue={editingRecipe?.cook_time}
                         min="0"
-                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        className="input-field"
                       />
                     </div>
                     <div>
@@ -472,14 +474,14 @@ const RecipesSection = () => {
                         value={formServings}
                         onChange={(e) => setFormServings(parseInt(e.target.value) || 1)}
                         min="1"
-                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        className="input-field"
                       />
                     </div>
                   </div>
 
-                  <div className="border-t pt-4">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Nutrition Information (total for recipe)</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                  <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Nutrition Information</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
                       Enter total nutrition for the entire recipe. Per-serving values are calculated automatically.
                     </p>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -494,7 +496,7 @@ const RecipesSection = () => {
                           onChange={(e) => setFormNutrients({...formNutrients, calories: parseFloat(e.target.value) || 0})}
                           min="0"
                           step="0.1"
-                          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                          className="input-field"
                         />
                         <span className="text-xs text-gray-500 dark:text-gray-400">
                           Per serving: {Math.round(formNutrients.calories / formServings)}
@@ -511,7 +513,7 @@ const RecipesSection = () => {
                           onChange={(e) => setFormNutrients({...formNutrients, protein: parseFloat(e.target.value) || 0})}
                           min="0"
                           step="0.1"
-                          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                          className="input-field"
                         />
                         <span className="text-xs text-gray-500 dark:text-gray-400">
                           Per serving: {Math.round(formNutrients.protein / formServings * 10) / 10}g
@@ -528,7 +530,7 @@ const RecipesSection = () => {
                           onChange={(e) => setFormNutrients({...formNutrients, carbs: parseFloat(e.target.value) || 0})}
                           min="0"
                           step="0.1"
-                          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                          className="input-field"
                         />
                         <span className="text-xs text-gray-500 dark:text-gray-400">
                           Per serving: {Math.round(formNutrients.carbs / formServings * 10) / 10}g
@@ -545,7 +547,7 @@ const RecipesSection = () => {
                           onChange={(e) => setFormNutrients({...formNutrients, fat: parseFloat(e.target.value) || 0})}
                           min="0"
                           step="0.1"
-                          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                          className="input-field"
                         />
                         <span className="text-xs text-gray-500 dark:text-gray-400">
                           Per serving: {Math.round(formNutrients.fat / formServings * 10) / 10}g
@@ -575,16 +577,19 @@ const RecipesSection = () => {
                     </div>
                   </div>
 
-                  <div className="flex space-x-3 pt-4">
-                    <button type="submit" className="flex-1 btn-primary">
-                      {editingRecipe ? 'Update Recipe' : 'Create Recipe'}
-                    </button>
+                  <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200 dark:border-gray-700">
                     <button
                       type="button"
                       onClick={() => setIsFormOpen(false)}
-                      className="flex-1 btn-secondary"
+                      className="px-6 py-2.5 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-xl font-medium transition-colors"
                     >
                       Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl font-medium shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30 transition-all"
+                    >
+                      {editingRecipe ? 'Update Recipe' : 'Create Recipe'}
                     </button>
                   </div>
                 </form>
