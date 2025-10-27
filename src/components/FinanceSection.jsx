@@ -3,6 +3,7 @@ import { FiPlus, FiEdit2, FiTrash2, FiDollarSign, FiTrendingUp, FiTrendingDown, 
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { financeService } from '../services/api';
+import { financeStorage } from '../services/localStorage';
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import { TransactionModal, BudgetModal } from './FinanceModals';
 import jsPDF from 'jspdf';
@@ -22,6 +23,36 @@ const FinanceSection = () => {
   const [filterPeriod, setFilterPeriod] = useState('month');
   const [reportPeriod, setReportPeriod] = useState('week');
 
+  // Debug function to check localStorage
+  const debugCheckStorage = () => {
+    const storageKey = 'todo_app_transactions';
+    const rawData = localStorage.getItem(storageKey);
+    console.log('Raw localStorage data:', rawData);
+    
+    if (rawData) {
+      try {
+        const parsed = JSON.parse(rawData);
+        console.log('Parsed transactions:', parsed);
+        console.log('Number of transactions:', parsed.length);
+        
+        // Get current user
+        const currentUser = JSON.parse(localStorage.getItem('todo_app_current_user') || '{}');
+        console.log('Current user:', currentUser);
+        
+        // Filter for current user
+        const userTransactions = parsed.filter(t => t.userId === currentUser.id);
+        console.log('User transactions:', userTransactions);
+        
+        return userTransactions;
+      } catch (e) {
+        console.error('Error parsing localStorage:', e);
+      }
+    } else {
+      console.log('No transactions found in localStorage');
+    }
+    return [];
+  };
+
   const expenseCategories = [
     'Food & Dining', 'Transportation', 'Shopping', 'Entertainment',
     'Bills & Utilities', 'Healthcare', 'Education', 'Other'
@@ -30,51 +61,6 @@ const FinanceSection = () => {
   const incomeCategories = [
     'Salary', 'Freelance', 'Investment', 'Business', 'Other'
   ];
-
-  // Function to add sample transactions for testing
-  const addSampleTransactions = () => {
-    const sampleTransactions = [
-      {
-        type: 'income',
-        amount: 5000,
-        category: 'Salary',
-        description: 'Monthly Salary',
-        date: new Date().toISOString().split('T')[0]
-      },
-      {
-        type: 'expense',
-        amount: 1200,
-        category: 'Bills & Utilities',
-        description: 'Rent Payment',
-        date: new Date().toISOString().split('T')[0]
-      },
-      {
-        type: 'expense',
-        amount: 250,
-        category: 'Food & Dining',
-        description: 'Groceries',
-        date: new Date(Date.now() - 86400000).toISOString().split('T')[0] // Yesterday
-      },
-      {
-        type: 'income',
-        amount: 800,
-        category: 'Freelance',
-        description: 'Web Design Project',
-        date: new Date(Date.now() - 172800000).toISOString().split('T')[0] // 2 days ago
-      }
-    ];
-
-    sampleTransactions.forEach(async (transaction) => {
-      try {
-        await financeService.createTransaction(transaction);
-      } catch (error) {
-        console.error('Error creating sample transaction:', error);
-      }
-    });
-
-    toast.success('Sample transactions added!');
-    setTimeout(() => fetchData(), 500); // Refresh data after adding
-  };
 
   useEffect(() => {
     fetchData();
@@ -86,38 +72,37 @@ const FinanceSection = () => {
   }, []);
 
   const generatePDFReport = async (period = 'week', includeAll = false) => {
-    // First, try to get transactions directly from localStorage as a fallback
-    const userId = JSON.parse(localStorage.getItem('todo_app_user'))?.id;
-    const storedTransactions = JSON.parse(localStorage.getItem('todo_app_transactions') || '[]')
-      .filter(t => !userId || t.userId === userId);
-    
-    console.log('Stored transactions from localStorage:', storedTransactions);
-    
-    // Always fetch latest transactions for the report
-    let currentTransactions = transactions;
+    // Directly fetch from localStorage to ensure we have the latest data
+    let currentTransactions = [];
     
     try {
-      const transactionsData = await financeService.getTransactions();
-      console.log('Fetched transactions from service:', transactionsData);
+      // First try to get directly from localStorage
+      currentTransactions = financeStorage.getTransactions();
+      console.log('Fetched from localStorage:', currentTransactions);
       
-      if (transactionsData && transactionsData.length > 0) {
-        currentTransactions = transactionsData;
-        setTransactions(transactionsData);
-      } else if (storedTransactions.length > 0) {
-        // Use localStorage data if service returns empty
-        currentTransactions = storedTransactions;
-        setTransactions(storedTransactions);
+      // Update the state with the latest data
+      if (currentTransactions && currentTransactions.length > 0) {
+        setTransactions(currentTransactions);
       }
     } catch (error) {
-      console.error('Error fetching transactions:', error);
-      // Use localStorage data as fallback
-      if (storedTransactions.length > 0) {
-        currentTransactions = storedTransactions;
-        setTransactions(storedTransactions);
+      console.error('Error fetching transactions from localStorage:', error);
+      
+      // Fallback to API service
+      try {
+        const transactionsData = await financeService.getTransactions();
+        if (transactionsData && transactionsData.length > 0) {
+          currentTransactions = transactionsData;
+          setTransactions(transactionsData);
+        }
+      } catch (apiError) {
+        console.error('Error fetching transactions from API:', apiError);
       }
     }
 
-    console.log('Current transactions for PDF:', currentTransactions);
+    // Final check - also look at state if nothing found
+    if ((!currentTransactions || currentTransactions.length === 0) && transactions.length > 0) {
+      currentTransactions = transactions;
+    }
 
     if (!currentTransactions || currentTransactions.length === 0) {
       toast.error('No transactions available to generate report. Please add some transactions first.');
@@ -434,7 +419,7 @@ const FinanceSection = () => {
         <div>
           <div className="mb-6 flex justify-between items-center">
             {/* PDF Download Buttons */}
-            <div className="flex space-x-2 flex-wrap gap-2">
+            <div className="flex space-x-2">
               <button
                 onClick={() => generatePDFReport('week')}
                 className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
@@ -457,11 +442,14 @@ const FinanceSection = () => {
                 <span>All Transactions</span>
               </button>
               <button
-                onClick={addSampleTransactions}
-                className="flex items-center space-x-2 px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition-colors"
+                onClick={() => {
+                  const data = debugCheckStorage();
+                  toast.success(`Found ${data.length} transactions in storage`);
+                }}
+                className="flex items-center space-x-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors"
               >
-                <FiPlus className="w-4 h-4" />
-                <span>Add Sample Data</span>
+                <FiFileText className="w-4 h-4" />
+                <span>Debug Check</span>
               </button>
             </div>
             
@@ -589,7 +577,7 @@ const FinanceSection = () => {
             </div>
             
             {/* PDF Download Buttons */}
-            <div className="flex space-x-2 flex-wrap gap-2">
+            <div className="flex space-x-2">
               <button
                 onClick={() => generatePDFReport('week')}
                 className="flex items-center space-x-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm transition-colors"
