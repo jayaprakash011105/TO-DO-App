@@ -8,10 +8,14 @@ import RecipesSection from '../components/RecipesSection';
 import FinanceSection from '../components/FinanceSection';
 import UserProfile from '../components/UserProfile';
 import StatsDashboard from '../components/StatsDashboard';
+import PomodoroTimer from '../components/PomodoroTimer';
+import CalendarView from '../components/CalendarView';
+import HabitTracker from '../components/HabitTracker';
 import { 
   FiLogOut, FiSun, FiMoon, FiCheckSquare, FiFileText, 
   FiBook, FiDollarSign, FiUser, FiSearch, FiBarChart2,
-  FiCommand, FiBell, FiDownload, FiUpload
+  FiCommand, FiBell, FiDownload, FiUpload, FiClock,
+  FiCalendar, FiTarget
 } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
@@ -24,11 +28,14 @@ const DashboardNew = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
   const [notifications, setNotifications] = useState(3);
+  const [showPomodoro, setShowPomodoro] = useState(false);
   const navigate = useNavigate();
 
   const tabs = [
     { id: 'stats', label: 'Dashboard', icon: FiBarChart2 },
     { id: 'todos', label: 'Tasks', icon: FiCheckSquare },
+    { id: 'calendar', label: 'Calendar', icon: FiCalendar },
+    { id: 'habits', label: 'Habits', icon: FiTarget },
     { id: 'notes', label: 'Notes', icon: FiFileText },
     { id: 'recipes', label: 'Recipes', icon: FiBook },
     { id: 'finance', label: 'Finance', icon: FiDollarSign },
@@ -125,6 +132,15 @@ const DashboardNew = () => {
               </div>
             </div>
             <div className="flex items-center space-x-3">
+              {/* Pomodoro Timer */}
+              <button
+                onClick={() => setShowPomodoro(true)}
+                className="p-2.5 rounded-xl bg-white/50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-700 transition-all duration-300 hover:shadow-lg"
+                title="Pomodoro Timer"
+              >
+                <FiClock className="w-5 h-5" />
+              </button>
+              
               {/* Search Button */}
               <button
                 onClick={() => setShowSearch(!showSearch)}
@@ -239,6 +255,13 @@ const DashboardNew = () => {
         )}
       </AnimatePresence>
 
+      {/* Pomodoro Timer Modal */}
+      <AnimatePresence>
+        {showPomodoro && (
+          <PomodoroTimer onClose={() => setShowPomodoro(false)} />
+        )}
+      </AnimatePresence>
+
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Tab Navigation */}
         <div className="flex space-x-2 mb-8 p-2 glass-effect backdrop-blur-xl rounded-2xl shadow-xl">
@@ -272,6 +295,8 @@ const DashboardNew = () => {
         >
           {activeTab === 'stats' && <StatsDashboard />}
           {activeTab === 'todos' && <TodoSection />}
+          {activeTab === 'calendar' && <CalendarView />}
+          {activeTab === 'habits' && <HabitTracker />}
           {activeTab === 'notes' && <NotesSection />}
           {activeTab === 'recipes' && <RecipesSection />}
           {activeTab === 'finance' && <FinanceSection />}
