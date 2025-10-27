@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
-import { FiPlus, FiEdit2, FiTrash2, FiDollarSign, FiTrendingUp, FiTrendingDown, FiPieChart, FiCalendar, FiFilter } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiDollarSign, FiTrendingUp, FiTrendingDown, FiPieChart, FiCalendar, FiFilter, FiDownload, FiFileText } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { financeService } from '../services/api';
-import { format } from 'date-fns';
+import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import { TransactionModal, BudgetModal } from './FinanceModals';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 const FinanceSection = () => {
   const [transactions, setTransactions] = useState([]);
@@ -18,6 +20,7 @@ const FinanceSection = () => {
   const [editingBudget, setEditingBudget] = useState(null);
   const [filterType, setFilterType] = useState('all');
   const [filterPeriod, setFilterPeriod] = useState('month');
+  const [reportPeriod, setReportPeriod] = useState('week');
 
   const expenseCategories = [
     'Food & Dining', 'Transportation', 'Shopping', 'Entertainment',
@@ -31,6 +34,136 @@ const FinanceSection = () => {
   useEffect(() => {
     fetchData();
   }, [filterPeriod]);
+
+  const generatePDFReport = (period = 'week') => {
+    const doc = new jsPDF();
+    const now = new Date();
+    let startDate, endDate, periodText;
+
+    if (period === 'week') {
+      startDate = startOfWeek(now, { weekStartsOn: 1 });
+      endDate = endOfWeek(now, { weekStartsOn: 1 });
+      periodText = 'Weekly';
+    } else {
+      startDate = startOfMonth(now);
+      endDate = endOfMonth(now);
+      periodText = 'Monthly';
+    }
+
+    // Filter transactions for the period
+    const periodTransactions = transactions.filter(t => {
+      const transDate = new Date(t.date);
+      return isWithinInterval(transDate, { start: startDate, end: endDate });
+    });
+
+    // Calculate totals
+    const totalIncome = periodTransactions
+      .filter(t => t.type === 'income')
+      .reduce((sum, t) => sum + t.amount, 0);
+    const totalExpense = periodTransactions
+      .filter(t => t.type === 'expense')
+      .reduce((sum, t) => sum + t.amount, 0);
+    const netAmount = totalIncome - totalExpense;
+
+    // Add header
+    doc.setFontSize(20);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`${periodText} Financial Report`, 105, 20, { align: 'center' });
+    
+    // Add period info
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Period: ${format(startDate, 'MMM dd, yyyy')} - ${format(endDate, 'MMM dd, yyyy')}`, 105, 30, { align: 'center' });
+    doc.text(`Generated: ${format(now, 'MMM dd, yyyy HH:mm')}`, 105, 37, { align: 'center' });
+
+    // Add summary section
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Summary', 20, 50);
+    
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Total Income: $${totalIncome.toFixed(2)}`, 20, 60);
+    doc.text(`Total Expenses: $${totalExpense.toFixed(2)}`, 20, 67);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`Net Amount: $${netAmount.toFixed(2)}`, 20, 74);
+    doc.setFont('helvetica', 'normal');
+
+    // Add transactions table
+    if (periodTransactions.length > 0) {
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Transaction Details', 20, 90);
+
+      const tableData = periodTransactions.map(t => [
+        format(new Date(t.date), 'MMM dd'),
+        t.description,
+        t.category,
+        t.type === 'income' ? `+$${t.amount.toFixed(2)}` : `-$${t.amount.toFixed(2)}`,
+        t.type
+      ]);
+
+      doc.autoTable({
+        startY: 95,
+        head: [['Date', 'Description', 'Category', 'Amount', 'Type']],
+        body: tableData,
+        theme: 'striped',
+        headStyles: { fillColor: [59, 130, 246] },
+        alternateRowStyles: { fillColor: [245, 247, 250] },
+        styles: { fontSize: 10 },
+        columnStyles: {
+          0: { cellWidth: 25 },
+          1: { cellWidth: 60 },
+          2: { cellWidth: 40 },
+          3: { cellWidth: 30, halign: 'right' },
+          4: { cellWidth: 25 }
+        }
+      });
+
+      // Add category breakdown
+      const yPos = doc.lastAutoTable.finalY + 15;
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Category Breakdown', 20, yPos);
+
+      // Group by category
+      const categoryTotals = {};
+      periodTransactions.forEach(t => {
+        if (!categoryTotals[t.category]) {
+          categoryTotals[t.category] = { income: 0, expense: 0 };
+        }
+        if (t.type === 'income') {
+          categoryTotals[t.category].income += t.amount;
+        } else {
+          categoryTotals[t.category].expense += t.amount;
+        }
+      });
+
+      const categoryData = Object.entries(categoryTotals).map(([category, totals]) => [
+        category,
+        totals.income > 0 ? `$${totals.income.toFixed(2)}` : '-',
+        totals.expense > 0 ? `$${totals.expense.toFixed(2)}` : '-'
+      ]);
+
+      doc.autoTable({
+        startY: yPos + 5,
+        head: [['Category', 'Income', 'Expenses']],
+        body: categoryData,
+        theme: 'striped',
+        headStyles: { fillColor: [59, 130, 246] },
+        alternateRowStyles: { fillColor: [245, 247, 250] },
+        styles: { fontSize: 10 }
+      });
+    } else {
+      doc.setFontSize(12);
+      doc.text('No transactions found for this period.', 20, 90);
+    }
+
+    // Save the PDF
+    const filename = `Financial_Report_${periodText}_${format(now, 'yyyy-MM-dd')}.pdf`;
+    doc.save(filename);
+    toast.success(`${periodText} report downloaded successfully!`);
+  };
 
   const fetchData = async () => {
     try {
@@ -186,7 +319,26 @@ const FinanceSection = () => {
       {/* Overview View */}
       {activeView === 'overview' && (
         <div>
-          <div className="mb-6 flex justify-end">
+          <div className="mb-6 flex justify-between items-center">
+            {/* PDF Download Buttons */}
+            <div className="flex space-x-2">
+              <button
+                onClick={() => generatePDFReport('week')}
+                className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+              >
+                <FiDownload className="w-4 h-4" />
+                <span>Weekly Report</span>
+              </button>
+              <button
+                onClick={() => generatePDFReport('month')}
+                className="flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+              >
+                <FiDownload className="w-4 h-4" />
+                <span>Monthly Report</span>
+              </button>
+            </div>
+            
+            {/* Period Filter */}
             <select
               value={filterPeriod}
               onChange={(e) => setFilterPeriod(e.target.value)}
@@ -287,7 +439,7 @@ const FinanceSection = () => {
       {activeView === 'transactions' && (
         <div>
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 mb-6 shadow-sm">
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center mb-4">
               <select
                 value={filterType}
                 onChange={(e) => setFilterType(e.target.value)}
@@ -306,6 +458,24 @@ const FinanceSection = () => {
               >
                 <FiPlus className="w-5 h-5" />
                 <span>Add Transaction</span>
+              </button>
+            </div>
+            
+            {/* PDF Download Buttons */}
+            <div className="flex space-x-2">
+              <button
+                onClick={() => generatePDFReport('week')}
+                className="flex items-center space-x-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm transition-colors"
+              >
+                <FiFileText className="w-4 h-4" />
+                <span>Download Weekly</span>
+              </button>
+              <button
+                onClick={() => generatePDFReport('month')}
+                className="flex items-center space-x-2 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm transition-colors"
+              >
+                <FiFileText className="w-4 h-4" />
+                <span>Download Monthly</span>
               </button>
             </div>
           </div>

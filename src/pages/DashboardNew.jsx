@@ -10,7 +10,6 @@ import FinanceSection from '../components/FinanceSection';
 import UserProfile from '../components/UserProfile';
 import StatsDashboard from '../components/StatsDashboard';
 import PomodoroTimer from '../components/PomodoroTimer';
-import CalendarView from '../components/CalendarView';
 import HabitTracker from '../components/HabitTracker';
 import { recipeService } from '../services/api';
 import toast from 'react-hot-toast';
@@ -63,7 +62,6 @@ const DashboardNew = () => {
   const tabs = [
     { id: 'stats', label: 'Dashboard', icon: FiBarChart2 },
     { id: 'todos', label: 'Tasks', icon: FiCheckSquare },
-    { id: 'calendar', label: 'Calendar', icon: FiCalendar },
     { id: 'habits', label: 'Habits', icon: FiTarget },
     { id: 'notes', label: 'Notes', icon: FiFileText },
     { id: 'recipes', label: 'Recipes', icon: FiBook },
@@ -324,7 +322,6 @@ const DashboardNew = () => {
         >
           {activeTab === 'stats' && <StatsDashboard />}
           {activeTab === 'todos' && <TodoSection />}
-          {activeTab === 'calendar' && <CalendarView />}
           {activeTab === 'habits' && <HabitTracker />}
           {activeTab === 'notes' && <NotesSection />}
           {activeTab === 'recipes' && (
