@@ -5,10 +5,9 @@ import {
   FiTrendingUp, FiActivity, FiPieChart, FiBarChart2,
   FiCheckCircle, FiClock, FiCalendar, FiAward,
   FiDollarSign, FiArrowUp, FiArrowDown, FiCreditCard,
-  FiDatabase, FiRefreshCw
+  FiRefreshCw
 } from 'react-icons/fi';
 import { format, startOfWeek, endOfWeek, eachDayOfInterval, subDays } from 'date-fns';
-import { populateSampleData, clearUserData } from '../utils/sampleData';
 import toast from 'react-hot-toast';
 
 const StatsDashboard = () => {
@@ -440,20 +439,6 @@ const StatsDashboard = () => {
         </div>
         <div className="flex flex-col items-end">
           <div className="flex items-center space-x-2 mb-2">
-            <button
-              onClick={() => {
-                if (populateSampleData()) {
-                  toast.success('Sample data added successfully!');
-                  calculateStats();
-                } else {
-                  toast.error('Please login first');
-                }
-              }}
-              className="px-3 py-1 text-xs bg-green-500 text-white rounded-lg hover:bg-green-600 flex items-center space-x-1"
-            >
-              <FiDatabase className="w-3 h-3" />
-              <span>Add Sample Data</span>
-            </button>
             <button
               onClick={() => {
                 calculateStats();

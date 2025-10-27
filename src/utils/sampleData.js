@@ -91,24 +91,24 @@ export const generateSampleData = (userId) => {
     {
       id: uuidv4(),
       userId,
-      title: "Spaghetti Carbonara",
-      ingredients: ["Pasta", "Eggs", "Bacon", "Parmesan", "Black pepper"],
+      name: "Spaghetti Carbonara",
+      ingredients: "Pasta, Eggs, Bacon, Parmesan, Black pepper",
       instructions: "Cook pasta, fry bacon, mix eggs with cheese, combine all",
       category: "dinner",
-      prepTime: "20 mins",
-      cookTime: "15 mins",
+      prep_time: 20,
+      cook_time: 15,
       servings: 4,
       createdAt: yesterday.toISOString()
     },
     {
       id: uuidv4(),
       userId,
-      title: "Green Smoothie",
-      ingredients: ["Spinach", "Banana", "Apple", "Yogurt", "Honey"],
+      name: "Green Smoothie",
+      ingredients: "Spinach, Banana, Apple, Yogurt, Honey",
       instructions: "Blend all ingredients until smooth",
       category: "breakfast",
-      prepTime: "5 mins",
-      cookTime: "0 mins",
+      prep_time: 5,
+      cook_time: 0,
       servings: 1,
       createdAt: today.toISOString()
     }
