@@ -10,6 +10,7 @@ import { format, startOfWeek, endOfWeek, eachDayOfInterval, subDays } from 'date
 
 const StatsDashboard = () => {
   const { user } = useAuth();
+  const [financialView, setFinancialView] = useState('weekly');
   const [stats, setStats] = useState({
     todayTasks: 0,
     weekTasks: 0,
@@ -23,9 +24,19 @@ const StatsDashboard = () => {
       balance: 0,
       monthlyIncome: 0,
       monthlyExpenses: 0,
+      weeklyIncome: 0,
+      weeklyExpenses: 0,
+      weeklyBalance: 0,
+      dailyAverage: 0,
       savingsRate: 0,
+      weeklySavingsRate: 0,
       topCategories: [],
-      recentTransactions: []
+      recentTransactions: [],
+      weeklyTrend: [],
+      comparisonData: {
+        incomeChange: 0,
+        expenseChange: 0
+      }
     }
   });
 
@@ -79,10 +90,25 @@ const StatsDashboard = () => {
     // Financial calculations
     const currentMonth = new Date().getMonth();
     const currentYear = new Date().getFullYear();
+    const today = new Date();
+    const weekAgo = subDays(today, 7);
+    const twoWeeksAgo = subDays(today, 14);
     
     const monthlyTransactions = transactions.filter(t => {
       const date = new Date(t.date);
       return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
+    });
+    
+    // Weekly transactions
+    const weeklyTransactions = transactions.filter(t => {
+      const date = new Date(t.date);
+      return date >= weekAgo && date <= today;
+    });
+    
+    // Previous week transactions for comparison
+    const previousWeekTransactions = transactions.filter(t => {
+      const date = new Date(t.date);
+      return date >= twoWeeksAgo && date < weekAgo;
     });
     
     const totalIncome = transactions
@@ -101,9 +127,42 @@ const StatsDashboard = () => {
       .filter(t => t.type === 'expense')
       .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
     
+    // Weekly calculations
+    const weeklyIncome = weeklyTransactions
+      .filter(t => t.type === 'income')
+      .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+    
+    const weeklyExpenses = weeklyTransactions
+      .filter(t => t.type === 'expense')
+      .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+    
+    const previousWeekIncome = previousWeekTransactions
+      .filter(t => t.type === 'income')
+      .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+    
+    const previousWeekExpenses = previousWeekTransactions
+      .filter(t => t.type === 'expense')
+      .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+    
+    const weeklyBalance = weeklyIncome - weeklyExpenses;
+    const dailyAverage = weeklyExpenses / 7;
+    
     const balance = totalIncome - totalExpenses;
     const savingsRate = monthlyIncome > 0 
       ? Math.round(((monthlyIncome - monthlyExpenses) / monthlyIncome) * 100)
+      : 0;
+    
+    const weeklySavingsRate = weeklyIncome > 0
+      ? Math.round(((weeklyIncome - weeklyExpenses) / weeklyIncome) * 100)
+      : 0;
+    
+    // Calculate week-over-week changes
+    const incomeChange = previousWeekIncome > 0 
+      ? Math.round(((weeklyIncome - previousWeekIncome) / previousWeekIncome) * 100)
+      : 0;
+    
+    const expenseChange = previousWeekExpenses > 0
+      ? Math.round(((weeklyExpenses - previousWeekExpenses) / previousWeekExpenses) * 100)
       : 0;
     
     // Top expense categories
@@ -124,6 +183,30 @@ const StatsDashboard = () => {
     const recentTransactions = transactions
       .sort((a, b) => new Date(b.date) - new Date(a.date))
       .slice(0, 5);
+    
+    // Weekly trend data (last 7 days)
+    const weeklyTrend = eachDayOfInterval({ start: weekAgo, end: today }).map(day => {
+      const dayTransactions = transactions.filter(t => {
+        const date = new Date(t.date);
+        return date.toDateString() === day.toDateString();
+      });
+      
+      const dayIncome = dayTransactions
+        .filter(t => t.type === 'income')
+        .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+      
+      const dayExpenses = dayTransactions
+        .filter(t => t.type === 'expense')
+        .reduce((sum, t) => sum + parseFloat(t.amount || 0), 0);
+      
+      return {
+        day: format(day, 'EEE'),
+        date: format(day, 'MMM dd'),
+        income: dayIncome,
+        expenses: dayExpenses,
+        net: dayIncome - dayExpenses
+      };
+    });
     
     // Category breakdown
     const categoryBreakdown = {
@@ -154,9 +237,19 @@ const StatsDashboard = () => {
         balance,
         monthlyIncome,
         monthlyExpenses,
+        weeklyIncome,
+        weeklyExpenses,
+        weeklyBalance,
+        dailyAverage,
         savingsRate,
+        weeklySavingsRate,
         topCategories,
-        recentTransactions
+        recentTransactions,
+        weeklyTrend,
+        comparisonData: {
+          incomeChange,
+          expenseChange
+        }
       }
     });
   };
@@ -242,10 +335,39 @@ const StatsDashboard = () => {
       {/* Financial Overview Section */}
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-            Financial Overview
-          </h3>
+          <div>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+              Financial Overview
+            </h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              Real-time sync with Finance section
+            </p>
+          </div>
           <FiDollarSign className="w-6 h-6 text-gray-400" />
+        </div>
+        
+        {/* Weekly/Monthly Toggle */}
+        <div className="flex space-x-2 mb-6">
+          <button
+            onClick={() => setFinancialView('weekly')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              financialView === 'weekly'
+                ? 'bg-blue-500 text-white'
+                : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+            }`}
+          >
+            Weekly
+          </button>
+          <button
+            onClick={() => setFinancialView('monthly')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              financialView === 'monthly'
+                ? 'bg-blue-500 text-white'
+                : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+            }`}
+          >
+            Monthly
+          </button>
         </div>
         
         {/* Financial Stats Grid */}
@@ -256,10 +378,25 @@ const StatsDashboard = () => {
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Monthly Income</p>
-                <p className="text-2xl font-bold text-green-600 dark:text-green-400">
-                  ${stats.financialData.monthlyIncome.toFixed(2)}
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {financialView === 'weekly' ? 'Weekly Income' : 'Monthly Income'}
                 </p>
+                <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                  ${financialView === 'weekly' 
+                    ? stats.financialData.weeklyIncome.toFixed(2)
+                    : stats.financialData.monthlyIncome.toFixed(2)
+                  }
+                </p>
+                {financialView === 'weekly' && stats.financialData.comparisonData.incomeChange !== 0 && (
+                  <p className={`text-xs mt-1 ${
+                    stats.financialData.comparisonData.incomeChange > 0 
+                      ? 'text-green-600' 
+                      : 'text-red-600'
+                  }`}>
+                    {stats.financialData.comparisonData.incomeChange > 0 ? '↑' : '↓'} 
+                    {Math.abs(stats.financialData.comparisonData.incomeChange)}% vs last week
+                  </p>
+                )}
               </div>
               <FiArrowUp className="w-8 h-8 text-green-500 opacity-50" />
             </div>
@@ -271,10 +408,25 @@ const StatsDashboard = () => {
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Monthly Expenses</p>
-                <p className="text-2xl font-bold text-red-600 dark:text-red-400">
-                  ${stats.financialData.monthlyExpenses.toFixed(2)}
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {financialView === 'weekly' ? 'Weekly Expenses' : 'Monthly Expenses'}
                 </p>
+                <p className="text-2xl font-bold text-red-600 dark:text-red-400">
+                  ${financialView === 'weekly'
+                    ? stats.financialData.weeklyExpenses.toFixed(2)
+                    : stats.financialData.monthlyExpenses.toFixed(2)
+                  }
+                </p>
+                {financialView === 'weekly' && stats.financialData.comparisonData.expenseChange !== 0 && (
+                  <p className={`text-xs mt-1 ${
+                    stats.financialData.comparisonData.expenseChange < 0 
+                      ? 'text-green-600' 
+                      : 'text-red-600'
+                  }`}>
+                    {stats.financialData.comparisonData.expenseChange > 0 ? '↑' : '↓'} 
+                    {Math.abs(stats.financialData.comparisonData.expenseChange)}% vs last week
+                  </p>
+                )}
               </div>
               <FiArrowDown className="w-8 h-8 text-red-500 opacity-50" />
             </div>
@@ -286,14 +438,25 @@ const StatsDashboard = () => {
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Current Balance</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {financialView === 'weekly' ? 'Weekly Balance' : 'Current Balance'}
+                </p>
                 <p className={`text-2xl font-bold ${
-                  stats.financialData.balance >= 0 
+                  (financialView === 'weekly' ? stats.financialData.weeklyBalance : stats.financialData.balance) >= 0 
                     ? 'text-blue-600 dark:text-blue-400' 
                     : 'text-red-600 dark:text-red-400'
                 }`}>
-                  ${Math.abs(stats.financialData.balance).toFixed(2)}
+                  ${Math.abs(
+                    financialView === 'weekly' 
+                      ? stats.financialData.weeklyBalance 
+                      : stats.financialData.balance
+                  ).toFixed(2)}
                 </p>
+                {financialView === 'weekly' && (
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Daily avg: ${stats.financialData.dailyAverage.toFixed(2)}
+                  </p>
+                )}
               </div>
               <FiCreditCard className="w-8 h-8 text-blue-500 opacity-50" />
             </div>
@@ -304,26 +467,92 @@ const StatsDashboard = () => {
         <div className="mb-6">
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Savings Rate
+              {financialView === 'weekly' ? 'Weekly Savings Rate' : 'Monthly Savings Rate'}
             </span>
             <span className="text-sm font-bold text-gray-900 dark:text-white">
-              {stats.financialData.savingsRate}%
+              {financialView === 'weekly' 
+                ? stats.financialData.weeklySavingsRate
+                : stats.financialData.savingsRate
+              }%
             </span>
           </div>
           <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
             <motion.div
               initial={{ width: 0 }}
-              animate={{ width: `${Math.max(0, Math.min(100, stats.financialData.savingsRate))}%` }}
+              animate={{ 
+                width: `${Math.max(0, Math.min(100, 
+                  financialView === 'weekly' 
+                    ? stats.financialData.weeklySavingsRate
+                    : stats.financialData.savingsRate
+                ))}%` 
+              }}
               className={`h-3 rounded-full bg-gradient-to-r ${
-                stats.financialData.savingsRate >= 20 
+                (financialView === 'weekly' 
+                  ? stats.financialData.weeklySavingsRate 
+                  : stats.financialData.savingsRate) >= 20 
                   ? 'from-green-500 to-green-600' 
-                  : stats.financialData.savingsRate >= 10
+                  : (financialView === 'weekly' 
+                    ? stats.financialData.weeklySavingsRate 
+                    : stats.financialData.savingsRate) >= 10
                   ? 'from-yellow-500 to-yellow-600'
                   : 'from-red-500 to-red-600'
               }`}
             />
           </div>
         </div>
+        
+        {/* Weekly Trend Chart (only show in weekly view) */}
+        {financialView === 'weekly' && (
+          <div className="mb-6">
+            <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+              7-Day Financial Trend
+            </h4>
+            <div className="grid grid-cols-7 gap-1">
+              {stats.financialData.weeklyTrend.map((day, index) => (
+                <div key={index} className="text-center">
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">
+                    {day.day}
+                  </div>
+                  <div className="relative h-24 bg-gray-100 dark:bg-gray-700 rounded">
+                    {day.income > 0 && (
+                      <motion.div
+                        initial={{ height: 0 }}
+                        animate={{ 
+                          height: `${Math.min(100, (day.income / Math.max(...stats.financialData.weeklyTrend.map(d => d.income))) * 100)}%` 
+                        }}
+                        className="absolute bottom-0 left-0 w-1/2 bg-green-500 rounded-tl"
+                      />
+                    )}
+                    {day.expenses > 0 && (
+                      <motion.div
+                        initial={{ height: 0 }}
+                        animate={{ 
+                          height: `${Math.min(100, (day.expenses / Math.max(...stats.financialData.weeklyTrend.map(d => d.expenses))) * 100)}%` 
+                        }}
+                        className="absolute bottom-0 right-0 w-1/2 bg-red-500 rounded-tr"
+                      />
+                    )}
+                  </div>
+                  <div className={`text-xs mt-1 font-medium ${
+                    day.net >= 0 ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    {day.net >= 0 ? '+' : ''}${day.net.toFixed(0)}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-center space-x-4 mt-2">
+              <div className="flex items-center space-x-1">
+                <div className="w-3 h-3 bg-green-500 rounded" />
+                <span className="text-xs text-gray-600 dark:text-gray-400">Income</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <div className="w-3 h-3 bg-red-500 rounded" />
+                <span className="text-xs text-gray-600 dark:text-gray-400">Expenses</span>
+              </div>
+            </div>
+          </div>
+        )}
         
         {/* Top Expense Categories */}
         <div className="mb-6">
