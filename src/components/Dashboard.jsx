@@ -176,12 +176,12 @@ const Dashboard = () => {
         savingsRate: savingsRate.toFixed(1),
         savedThisMonth: savedThisMonth,
         todayExpense: todayExpense,
-        todayAvg: dailyAverage,
+        todayAvg: dailyAverage.toFixed(2),
         weekExpense: weekExpense,
-        burnRate: dailyAverage,
-        dailyAverage: dailyAverage,
-        weeklyProjection: dailyAverage * 7,
-        monthlyProjection: dailyAverage * 30,
+        burnRate: dailyAverage.toFixed(2),
+        dailyAverage: dailyAverage.toFixed(2),
+        weeklyProjection: (dailyAverage * 7).toFixed(2),
+        monthlyProjection: (dailyAverage * 30).toFixed(2),
         budgetDaysLeft: monthlyIncome > 0 ? Math.floor((monthlyIncome - monthlyExpenses) / dailyAverage) : 0,
         categorySpending: categoryTotals
       }));
@@ -404,7 +404,7 @@ const Dashboard = () => {
 
           <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-xl p-4">
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Monthly Projection</p>
-            <p className="text-2xl font-bold text-yellow-600">₹{financialData.monthlyProjection.toFixed(2)}</p>
+            <p className="text-2xl font-bold text-yellow-600">₹{financialData.monthlyProjection}</p>
             <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">Expected total</p>
           </div>
         </div>

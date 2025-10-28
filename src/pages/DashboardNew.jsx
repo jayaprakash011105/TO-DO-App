@@ -61,11 +61,11 @@ const DashboardNew = () => {
 
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: FiHome },
+    { id: 'finance', label: 'Finance', icon: FiDollarSign },
     { id: 'todos', label: 'Tasks', icon: FiCheckSquare },
     { id: 'habits', label: 'Habits', icon: FiTarget },
     { id: 'notes', label: 'Notes', icon: FiFileText },
     { id: 'recipes', label: 'Recipes', icon: FiBook },
-    { id: 'finance', label: 'Finance', icon: FiDollarSign },
   ];
 
   useEffect(() => {
@@ -77,19 +77,22 @@ const DashboardNew = () => {
             setShowSearch(!showSearch);
             break;
           case '1':
-            setActiveTab('stats');
+            setActiveTab('dashboard');
             break;
           case '2':
-            setActiveTab('todos');
+            setActiveTab('finance');
             break;
           case '3':
-            setActiveTab('notes');
+            setActiveTab('todos');
             break;
           case '4':
-            setActiveTab('recipes');
+            setActiveTab('habits');
             break;
           case '5':
-            setActiveTab('finance');
+            setActiveTab('notes');
+            break;
+          case '6':
+            setActiveTab('recipes');
             break;
         }
       }
