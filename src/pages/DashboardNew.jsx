@@ -8,14 +8,13 @@ import RecipesSection from '../components/RecipesSection';
 import RecipeForm from '../components/RecipeForm';
 import FinanceSection from '../components/FinanceSection';
 import UserProfile from '../components/UserProfile';
-import StatsDashboard from '../components/StatsDashboard';
 import PomodoroTimer from '../components/PomodoroTimer';
 import HabitTracker from '../components/HabitTracker';
 import { recipeService } from '../services/api';
 import toast from 'react-hot-toast';
 import { 
   FiLogOut, FiSun, FiMoon, FiCheckSquare, FiFileText, 
-  FiBook, FiDollarSign, FiUser, FiSearch, FiBarChart2,
+  FiBook, FiDollarSign, FiUser, FiSearch,
   FiCommand, FiBell, FiDownload, FiUpload, FiClock,
   FiCalendar, FiTarget
 } from 'react-icons/fi';
@@ -60,7 +59,6 @@ const DashboardNew = () => {
   };
 
   const tabs = [
-    { id: 'stats', label: 'Dashboard', icon: FiBarChart2 },
     { id: 'todos', label: 'Tasks', icon: FiCheckSquare },
     { id: 'habits', label: 'Habits', icon: FiTarget },
     { id: 'notes', label: 'Notes', icon: FiFileText },
@@ -323,7 +321,6 @@ const DashboardNew = () => {
           transition={{ duration: 0.3, ease: "easeOut" }}
           className="glass-effect backdrop-blur-xl rounded-xl sm:rounded-3xl p-3 sm:p-6 shadow-2xl border border-white/20"
         >
-          {activeTab === 'stats' && <StatsDashboard />}
           {activeTab === 'todos' && <TodoSection />}
           {activeTab === 'habits' && <HabitTracker />}
           {activeTab === 'notes' && <NotesSection />}
