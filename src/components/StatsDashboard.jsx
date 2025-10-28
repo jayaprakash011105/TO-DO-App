@@ -405,19 +405,19 @@ const StatsDashboard = () => {
     <motion.div
       whileHover={{ scale: 1.02, y: -5 }}
       whileTap={{ scale: 0.98 }}
-      className={`relative overflow-hidden bg-gradient-to-br ${gradient} p-6 rounded-2xl shadow-xl`}
+      className={`relative overflow-hidden bg-gradient-to-br ${gradient} p-3 sm:p-4 lg:p-6 rounded-xl sm:rounded-2xl shadow-xl`}
     >
-      <div className="absolute top-0 right-0 -mt-4 -mr-4 opacity-10">
-        <Icon className="w-32 h-32" />
+      <div className="absolute top-0 right-0 -mt-2 -mr-2 sm:-mt-4 sm:-mr-4 opacity-10">
+        <Icon className="w-20 h-20 sm:w-24 sm:h-24 lg:w-32 lg:h-32" />
       </div>
       <div className="relative z-10">
-        <div className={`inline-flex items-center justify-center w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm mb-4`}>
-          <Icon className={`w-6 h-6 ${color}`} />
+        <div className={`inline-flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-lg sm:rounded-xl bg-white/20 backdrop-blur-sm mb-2 sm:mb-3 lg:mb-4`}>
+          <Icon className={`w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 ${color}`} />
         </div>
-        <h3 className="text-3xl font-bold text-white mb-1">{value}</h3>
-        <p className="text-white/90 font-medium">{title}</p>
+        <h3 className="text-lg sm:text-2xl lg:text-3xl font-bold text-white mb-0.5 sm:mb-1">{value}</h3>
+        <p className="text-white/90 font-medium text-xs sm:text-sm lg:text-base">{title}</p>
         {subtitle && (
-          <p className="text-white/70 text-sm mt-1">{subtitle}</p>
+          <p className="text-white/70 text-xxs sm:text-xs lg:text-sm mt-0.5 sm:mt-1">{subtitle}</p>
         )}
       </div>
     </motion.div>
@@ -461,7 +461,7 @@ const StatsDashboard = () => {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 lg:gap-6">
         <StatCard
           icon={FiCheckCircle}
           title="Today's Tasks"
@@ -535,7 +535,7 @@ const StatsDashboard = () => {
         </div>
         
         {/* Financial Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4 mb-4 sm:mb-6">
           <motion.div
             whileHover={{ scale: 1.02 }}
             className="bg-gradient-to-r from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 p-4 rounded-xl"
@@ -671,7 +671,7 @@ const StatsDashboard = () => {
             <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
               7-Day Financial Trend
             </h4>
-            <div className="grid grid-cols-7 gap-1">
+            <div className="grid grid-cols-7 gap-0.5 sm:gap-1">
               {stats.financialData.weeklyTrend.map((day, index) => (
                 <div key={index} className="text-center">
                   <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">
@@ -989,7 +989,7 @@ const StatsDashboard = () => {
           </div>
           
           <div className="space-y-4">
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-2 sm:gap-3">
               <div className="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                 <p className="text-2xl font-bold text-green-600 dark:text-green-400">
                   {stats.habitData.activeHabits}

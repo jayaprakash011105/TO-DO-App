@@ -11,6 +11,7 @@ import UserProfile from '../components/UserProfile';
 import StatsDashboard from '../components/StatsDashboard';
 import PomodoroTimer from '../components/PomodoroTimer';
 import HabitTracker from '../components/HabitTracker';
+import BottomNavBar from '../components/BottomNavBar';
 import { recipeService } from '../services/api';
 import toast from 'react-hot-toast';
 import { 
@@ -289,9 +290,9 @@ const DashboardNew = () => {
         )}
       </AnimatePresence>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Tab Navigation */}
-        <div className="flex space-x-2 mb-8 p-2 glass-effect backdrop-blur-xl rounded-2xl shadow-xl">
+      <main className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-2 sm:py-8 pb-20 sm:pb-8">
+        {/* Desktop Tab Navigation */}
+        <div className="hidden sm:flex space-x-2 mb-8 p-2 glass-effect backdrop-blur-xl rounded-2xl shadow-xl">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             return (
@@ -311,6 +312,29 @@ const DashboardNew = () => {
           })}
         </div>
 
+        {/* Mobile Tab Navigation - Horizontal Scroll */}
+        <div className="sm:hidden mb-4 -mx-2">
+          <div className="flex overflow-x-auto scrollbar-hide px-2 space-x-2">
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center space-x-1 px-3 py-2 rounded-lg whitespace-nowrap transition-all ${
+                    activeTab === tab.id
+                      ? 'bg-primary-600 text-white'
+                      : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  <span className="text-xs">{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         {/* Content */}
         <motion.div
           key={activeTab}
@@ -318,7 +342,7 @@ const DashboardNew = () => {
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
           transition={{ duration: 0.3, ease: "easeOut" }}
-          className="glass-effect backdrop-blur-xl rounded-3xl p-6 shadow-2xl border border-white/20"
+          className="glass-effect backdrop-blur-xl rounded-xl sm:rounded-3xl p-3 sm:p-6 shadow-2xl border border-white/20"
         >
           {activeTab === 'stats' && <StatsDashboard />}
           {activeTab === 'todos' && <TodoSection />}
@@ -344,6 +368,13 @@ const DashboardNew = () => {
         }}
         onSubmit={handleRecipeSubmit}
         editingRecipe={editingRecipe}
+      />
+
+      {/* Mobile Bottom Navigation */}
+      <BottomNavBar 
+        tabs={tabs}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
       />
     </div>
   );

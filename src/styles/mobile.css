@@ -9,6 +9,18 @@
   display: none;
 }
 
+/* Safe area for iOS devices */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Prevent body scroll on mobile when modal is open */
+body.modal-open {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+}
+
 /* Mobile-first responsive utilities */
 @media (max-width: 640px) {
   /* Header adjustments */
