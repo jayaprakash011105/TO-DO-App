@@ -438,54 +438,6 @@ const FinanceSection = () => {
       {/* Transactions View */}
       {activeView === 'transactions' && (
         <div>
-          {/* Header with Currency Selector */}
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center space-x-2">
-              <FiCreditCard className="w-6 h-6 text-purple-600" />
-              <span>Finance</span>
-            </h2>
-            <div className="flex items-center space-x-3">
-              <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                <FiMoon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-              </button>
-              <select className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
-                <option value="INR">₹ INR</option>
-                <option value="USD">$ USD</option>
-                <option value="EUR">€ EUR</option>
-              </select>
-              <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                <FiFilter className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-              </button>
-              <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                <FiDownload className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-              </button>
-            </div>
-          </div>
-
-          {/* Icon Navigation Tabs */}
-          <div className="flex justify-center mb-6">
-            <div className="flex items-center space-x-2 bg-gray-100 dark:bg-gray-800 rounded-xl p-1">
-              <button className="p-3 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
-                <FiHome className="w-5 h-5 text-purple-600" />
-              </button>
-              <button className="p-3 hover:bg-white dark:hover:bg-gray-700 rounded-lg transition-colors">
-                <FiDollarSign className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-              </button>
-              <button className="p-3 hover:bg-white dark:hover:bg-gray-700 rounded-lg transition-colors">
-                <FiCreditCard className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-              </button>
-              <button className="p-3 hover:bg-white dark:hover:bg-gray-700 rounded-lg transition-colors">
-                <FiTarget className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-              </button>
-              <button className="p-3 hover:bg-white dark:hover:bg-gray-700 rounded-lg transition-colors">
-                <FiInfo className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-              </button>
-              <button className="p-3 hover:bg-white dark:hover:bg-gray-700 rounded-lg transition-colors">
-                <FiHelpCircle className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-              </button>
-            </div>
-          </div>
-
           {/* Transactions Section */}
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 mb-6 shadow-sm">
             <div className="flex justify-between items-center mb-4">
