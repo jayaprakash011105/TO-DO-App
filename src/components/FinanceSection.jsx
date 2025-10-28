@@ -319,22 +319,24 @@ const FinanceSection = () => {
       {/* Overview View */}
       {activeView === 'overview' && (
         <div>
-          <div className="mb-6 flex justify-between items-center">
+          <div className="mb-6 flex flex-col sm:flex-row gap-3 sm:justify-between sm:items-center">
             {/* PDF Download Buttons */}
-            <div className="flex space-x-2">
+            <div className="flex gap-2">
               <button
                 onClick={() => generatePDFReport('week')}
-                className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm sm:text-base transition-colors"
               >
-                <FiDownload className="w-4 h-4" />
-                <span>Weekly Report</span>
+                <FiDownload className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">Weekly Report</span>
+                <span className="sm:hidden">Weekly</span>
               </button>
               <button
                 onClick={() => generatePDFReport('month')}
-                className="flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm sm:text-base transition-colors"
               >
-                <FiDownload className="w-4 h-4" />
-                <span>Monthly Report</span>
+                <FiDownload className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                <span className="hidden sm:inline">Monthly Report</span>
+                <span className="sm:hidden">Monthly</span>
               </button>
             </div>
             
@@ -342,7 +344,7 @@ const FinanceSection = () => {
             <select
               value={filterPeriod}
               onChange={(e) => setFilterPeriod(e.target.value)}
-              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              className="px-3 py-1.5 sm:px-4 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-sm sm:text-base text-gray-900 dark:text-white"
             >
               <option value="week">This Week</option>
               <option value="month">This Month</option>
