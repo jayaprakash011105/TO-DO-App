@@ -12,6 +12,8 @@ import StatsDashboard from '../components/StatsDashboard';
 import PomodoroTimer from '../components/PomodoroTimer';
 import HabitTracker from '../components/HabitTracker';
 import BottomNavBar from '../components/BottomNavBar';
+import MobileLayout from '../components/MobileLayout';
+import { useResponsive } from '../components/MobileResponsive';
 import { recipeService } from '../services/api';
 import toast from 'react-hot-toast';
 import { 
@@ -68,6 +70,17 @@ const DashboardNew = () => {
     { id: 'recipes', label: 'Recipes', icon: FiBook },
     { id: 'finance', label: 'Finance', icon: FiDollarSign },
   ];
+
+  // Check if mobile
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
+  
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -138,6 +151,43 @@ const DashboardNew = () => {
       reader.readAsText(file);
     }
   };
+
+  // Use mobile layout for mobile devices
+  if (isMobile) {
+    return (
+      <div className={isDarkMode ? 'dark' : ''}>
+        <MobileLayout
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          tabs={tabs}
+          user={user}
+        >
+          {activeTab === 'todos' && <TodoSection />}
+          {activeTab === 'habits' && <HabitTracker />}
+          {activeTab === 'notes' && <NotesSection />}
+          {activeTab === 'recipes' && (
+            <RecipesSection 
+              onOpenForm={openRecipeForm}
+              recipes={recipes}
+              setRecipes={setRecipes}
+            />
+          )}
+          {activeTab === 'finance' && <FinanceSection />}
+        </MobileLayout>
+        
+        {/* Recipe Form Modal */}
+        <RecipeForm
+          isOpen={recipeFormOpen}
+          onClose={() => {
+            setRecipeFormOpen(false);
+            setEditingRecipe(null);
+          }}
+          onSubmit={handleRecipeSubmit}
+          editingRecipe={editingRecipe}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className={`min-h-screen ${isDarkMode ? 'dark bg-gray-900' : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50'}`}>
