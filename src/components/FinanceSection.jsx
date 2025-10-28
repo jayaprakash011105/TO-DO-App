@@ -439,13 +439,13 @@ const FinanceSection = () => {
       {activeView === 'transactions' && (
         <div>
           {/* Controls Section */}
-          <div className="space-y-4 mb-6">
+          <div className="space-y-3 mb-6">
             {/* Filter and Add Button Row */}
-            <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
               <select
                 value={filterType}
                 onChange={(e) => setFilterType(e.target.value)}
-                className="px-4 py-2.5 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white font-medium"
+                className="flex-1 px-3 py-2 sm:px-4 sm:py-2.5 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl text-sm sm:text-base text-gray-900 dark:text-white font-medium"
               >
                 <option value="all">All Transactions</option>
                 <option value="income">Income Only</option>
@@ -456,25 +456,26 @@ const FinanceSection = () => {
                   setEditingTransaction(null);
                   setIsTransactionFormOpen(true);
                 }}
-                className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors flex items-center space-x-2"
+                className="px-4 py-2 sm:px-6 sm:py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm sm:text-base font-medium transition-colors flex items-center gap-2 whitespace-nowrap"
               >
                 <FiPlus className="w-4 h-4" />
-                <span>Add Transaction</span>
+                <span className="hidden sm:inline">Add Transaction</span>
+                <span className="sm:hidden">Add</span>
               </button>
             </div>
             
             {/* PDF Download Buttons */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2 sm:gap-3">
               <button
                 onClick={() => generatePDFReport('week')}
-                className="flex items-center justify-center space-x-2 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors"
+                className="flex items-center justify-center gap-2 px-3 py-2.5 sm:px-4 sm:py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm sm:text-base font-medium transition-colors"
               >
                 <FiFileText className="w-4 h-4" />
                 <span>Download Weekly</span>
               </button>
               <button
                 onClick={() => generatePDFReport('month')}
-                className="flex items-center justify-center space-x-2 px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-medium transition-colors"
+                className="flex items-center justify-center gap-2 px-3 py-2.5 sm:px-4 sm:py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl text-sm sm:text-base font-medium transition-colors"
               >
                 <FiFileText className="w-4 h-4" />
                 <span>Download Monthly</span>
@@ -490,59 +491,60 @@ const FinanceSection = () => {
                 </p>
               </div>
             ) : (
-              <div className="space-y-1">
+              <div className="space-y-2">
                 {filteredTransactions.map((transaction) => (
                   <div
                     key={transaction.id}
-                    className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
+                    className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3 sm:p-4 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all"
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1">
-                            <h4 className="font-semibold text-gray-900 dark:text-white text-base">
-                              {transaction.description}
-                            </h4>
-                            <div className="flex items-center space-x-3 mt-1.5">
-                              <span className="text-sm text-gray-500 dark:text-gray-400">
-                                {format(new Date(transaction.date), 'dd/MM/yyyy')}
-                              </span>
-                              <span className="text-sm text-gray-400">•</span>
-                              <span className="text-sm text-gray-500 dark:text-gray-400">
-                                {transaction.category}
-                              </span>
-                              <span className="text-sm text-gray-400">•</span>
-                              <span className="text-sm text-gray-500 dark:text-gray-400">
-                                {transaction.account || 'Jai'}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="flex items-center space-x-3">
-                            <span className={`text-xl font-bold ${
-                              transaction.type === 'income'
-                                ? 'text-green-500'
-                                : 'text-red-500'
-                            }`}>
-                              {transaction.type === 'income' ? '+' : '-'}₹{transaction.amount.toFixed(2)}
-                            </span>
-                            <div className="flex items-center space-x-1">
-                              <button
-                                onClick={() => {
-                                  setEditingTransaction(transaction);
-                                  setIsTransactionFormOpen(true);
-                                }}
-                                className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-all"
-                              >
-                                <FiEdit2 className="w-4 h-4" />
-                              </button>
-                              <button
-                                onClick={() => handleDeleteTransaction(transaction.id)}
-                                className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
-                              >
-                                <FiTrash2 className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </div>
+                    <div className="flex items-start justify-between gap-3">
+                      {/* Left side - Transaction details */}
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-semibold text-gray-900 dark:text-white text-sm sm:text-base truncate">
+                          {transaction.description}
+                        </h4>
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1.5">
+                          <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                            {format(new Date(transaction.date), 'dd/MM/yyyy')}
+                          </span>
+                          <span className="text-xs sm:text-sm text-gray-400">•</span>
+                          <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                            {transaction.category}
+                          </span>
+                          <span className="text-xs sm:text-sm text-gray-400">•</span>
+                          <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                            {transaction.account || 'Jai'}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      {/* Right side - Amount and actions */}
+                      <div className="flex flex-col items-end gap-2">
+                        <span className={`text-base sm:text-xl font-bold whitespace-nowrap ${
+                          transaction.type === 'income'
+                            ? 'text-green-500'
+                            : 'text-red-500'
+                        }`}>
+                          {transaction.type === 'income' ? '+' : '-'}₹{transaction.amount.toFixed(2)}
+                        </span>
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => {
+                              setEditingTransaction(transaction);
+                              setIsTransactionFormOpen(true);
+                            }}
+                            className="p-1.5 sm:p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-all"
+                            aria-label="Edit transaction"
+                          >
+                            <FiEdit2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteTransaction(transaction.id)}
+                            className="p-1.5 sm:p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
+                            aria-label="Delete transaction"
+                          >
+                            <FiTrash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                          </button>
                         </div>
                       </div>
                     </div>
