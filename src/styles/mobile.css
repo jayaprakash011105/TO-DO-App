@@ -1,0 +1,81 @@
+/* Mobile Responsive Styles */
+
+/* Hide scrollbar for mobile navigation */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Mobile-first responsive utilities */
+@media (max-width: 640px) {
+  /* Header adjustments */
+  .mobile-header {
+    padding: 0.5rem;
+  }
+
+  /* Navigation tabs - horizontal scroll */
+  .mobile-nav-tabs {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .mobile-nav-tabs > * {
+    scroll-snap-align: start;
+    flex-shrink: 0;
+  }
+
+  /* Form adjustments */
+  .mobile-form {
+    padding: 1rem;
+  }
+
+  /* Modal adjustments */
+  .mobile-modal {
+    margin: 0.5rem;
+    max-height: calc(100vh - 1rem);
+  }
+
+  /* Card grid adjustments */
+  .mobile-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Button adjustments */
+  .mobile-button-text {
+    display: none;
+  }
+
+  /* Table responsive */
+  .mobile-table {
+    display: block;
+    overflow-x: auto;
+  }
+}
+
+/* Tablet adjustments */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .tablet-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Touch-friendly tap targets */
+@media (pointer: coarse) {
+  button, a, input, select, textarea {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Landscape mode adjustments */
+@media (orientation: landscape) and (max-height: 500px) {
+  .landscape-compact {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+}

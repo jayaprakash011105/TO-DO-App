@@ -5,6 +5,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import mobile responsive styles */
+@import './styles/mobile.css';
+
 /* Custom Base Styles */
 @layer base {
   html {

@@ -107,40 +107,40 @@ const TodoSection = () => {
   return (
     <div>
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
-          <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Tasks</p>
-          <p className="text-3xl font-bold text-gray-900 dark:text-white mt-1">{stats.total}</p>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-6 mb-4 sm:mb-8">
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-3 sm:p-6 shadow-sm">
+          <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Total Tasks</p>
+          <p className="text-xl sm:text-3xl font-bold text-gray-900 dark:text-white mt-1">{stats.total}</p>
         </div>
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
-          <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Completed</p>
-          <p className="text-3xl font-bold text-green-600 dark:text-green-400 mt-1">{stats.completed}</p>
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-3 sm:p-6 shadow-sm">
+          <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Completed</p>
+          <p className="text-xl sm:text-3xl font-bold text-green-600 dark:text-green-400 mt-1">{stats.completed}</p>
         </div>
-        <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
-          <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Active</p>
-          <p className="text-3xl font-bold text-blue-600 dark:text-blue-400 mt-1">{stats.active}</p>
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-3 sm:p-6 shadow-sm col-span-2 sm:col-span-1">
+          <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">Pending</p>
+          <p className="text-xl sm:text-3xl font-bold text-yellow-600 dark:text-yellow-400 mt-1">{stats.pending}</p>
         </div>
       </div>
 
       {/* Controls */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl p-6 mb-6 shadow-sm">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
-          <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
-            <div className="relative">
-              <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+      <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 mb-4 sm:mb-6 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+          <div className="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
+            <div className="relative w-full sm:w-auto">
+              <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
               <input
                 type="text"
                 placeholder="Search tasks..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full sm:w-auto pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
             </div>
 
             <select
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
-              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full sm:w-auto px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
               <option value="all">All Tasks</option>
               <option value="active">Active</option>
@@ -153,10 +153,10 @@ const TodoSection = () => {
               setEditingTodo(null);
               setIsFormOpen(true);
             }}
-            className="btn-primary flex items-center space-x-2"
+            className="w-full sm:w-auto btn-primary flex items-center justify-center space-x-2"
           >
-            <FiPlus className="w-5 h-5" />
-            <span>Add Task</span>
+            <FiPlus className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="text-sm sm:text-base">Add Task</span>
           </button>
         </div>
       </div>
