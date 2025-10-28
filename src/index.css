@@ -5,9 +5,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Import mobile responsive styles */
-@import './styles/mobile.css';
-
 /* Custom Base Styles */
 @layer base {
   html {
@@ -28,6 +25,20 @@
   .dark body {
     /* Dark mode body styles */
     @apply bg-gray-900 text-gray-100;
+  }
+}
+
+/* Custom Utility Classes */
+@layer utilities {
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
   }
 }
 

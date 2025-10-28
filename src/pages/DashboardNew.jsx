@@ -11,8 +11,6 @@ import UserProfile from '../components/UserProfile';
 import StatsDashboard from '../components/StatsDashboard';
 import PomodoroTimer from '../components/PomodoroTimer';
 import HabitTracker from '../components/HabitTracker';
-import MobileLayout from '../components/MobileLayout';
-import { MobileStatsGrid, FinancialCard } from '../components/MobileCards';
 import { recipeService } from '../services/api';
 import toast from 'react-hot-toast';
 import { 
@@ -140,155 +138,71 @@ const DashboardNew = () => {
     }
   };
 
-  // Check if mobile
-  const [isMobile, setIsMobile] = useState(false);
-  
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  // Mobile Layout
-  if (isMobile) {
-    return (
-      <div className={isDarkMode ? 'dark' : ''}>
-        <MobileLayout
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          tabs={tabs}
-          user={user}
-          isDarkMode={isDarkMode}
-          toggleDarkMode={toggleDarkMode}
-          logout={logout}
-          showProfile={showProfile}
-          setShowProfile={setShowProfile}
-        >
-          {/* Mobile Content */}
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeTab}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.2 }}
-            >
-              {activeTab === 'stats' && (
-                <div>
-                  <MobileStatsGrid stats={{
-                    todayTasks: 8,
-                    weeklyProgress: 65,
-                    productivity: 82,
-                    totalItems: 24
-                  }} />
-                  <div className="grid grid-cols-1 gap-3">
-                    <FinancialCard type="income" amount={1200} trend={12} />
-                    <FinancialCard type="expense" amount={482} trend={-8} />
-                  </div>
-                </div>
-              )}
-              {activeTab === 'todos' && <TodoSection />}
-              {activeTab === 'habits' && <HabitTracker />}
-              {activeTab === 'notes' && <NotesSection />}
-              {activeTab === 'recipes' && (
-                <RecipesSection 
-                  onOpenForm={openRecipeForm}
-                  recipes={recipes}
-                  setRecipes={setRecipes}
-                />
-              )}
-              {activeTab === 'finance' && <FinanceSection />}
-            </motion.div>
-          </AnimatePresence>
-        </MobileLayout>
-
-        {/* Modals */}
-        {showProfile && (
-          <UserProfile
-            user={user}
-            onClose={() => setShowProfile(false)}
-          />
-        )}
-        
-        <RecipeForm
-          isOpen={recipeFormOpen}
-          onClose={() => {
-            setRecipeFormOpen(false);
-            setEditingRecipe(null);
-          }}
-          onSubmit={handleRecipeSubmit}
-          editingRecipe={editingRecipe}
-        />
-      </div>
-    );
-  }
-
-  // Desktop Layout
   return (
     <div className={`min-h-screen ${isDarkMode ? 'dark bg-gray-900' : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50'}`}>
       {/* Header */}
       <header className="glass-effect backdrop-blur-xl shadow-xl border-b border-white/20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
-            <div className="flex items-center space-x-4">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
+          <div className="flex items-center justify-between h-16 sm:h-20">
+            <div className="flex items-center space-x-2 sm:space-x-4">
               <button
                 onClick={() => setShowProfile(true)}
-                className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-lg hover:shadow-lg transition-shadow"
+                className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-base sm:text-lg hover:shadow-lg transition-shadow flex-shrink-0"
               >
                 {user?.username?.charAt(0).toUpperCase()}
               </button>
-              <div>
-                <h1 className="text-2xl font-bold gradient-text">My Workspace</h1>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+              <div className="hidden sm:block">
+                <h1 className="text-xl sm:text-2xl font-bold gradient-text">My Workspace</h1>
+                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                   Welcome back, {user?.username}!
                 </p>
               </div>
+              <div className="block sm:hidden">
+                <h1 className="text-lg font-bold gradient-text">Workspace</h1>
+              </div>
             </div>
-            <div className="flex items-center space-x-3">
-              {/* Pomodoro Timer */}
+            <div className="flex items-center space-x-1 sm:space-x-3">
+              {/* Pomodoro Timer - Hidden on mobile */}
               <button
                 onClick={() => setShowPomodoro(true)}
-                className="p-2.5 rounded-xl bg-white/50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-700 transition-all duration-300 hover:shadow-lg"
+                className="hidden sm:block p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-white/50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-700 transition-all duration-300 hover:shadow-lg"
                 title="Pomodoro Timer"
               >
-                <FiClock className="w-5 h-5" />
+                <FiClock className="w-4 sm:w-5 h-4 sm:h-5" />
               </button>
               
               {/* Search Button */}
               <button
                 onClick={() => setShowSearch(!showSearch)}
-                className="p-2.5 rounded-xl bg-white/50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-700 transition-all duration-300 hover:shadow-lg"
+                className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-white/50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-700 transition-all duration-300 hover:shadow-lg"
                 title="Search (Ctrl+K)"
               >
-                <FiSearch className="w-5 h-5" />
+                <FiSearch className="w-4 sm:w-5 h-4 sm:h-5" />
               </button>
               
-              {/* Notifications */}
+              {/* Notifications - Hidden on mobile */}
               <button
-                className="relative p-2.5 rounded-xl bg-white/50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-700 transition-all duration-300 hover:shadow-lg"
+                className="hidden sm:block relative p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-white/50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-700 transition-all duration-300 hover:shadow-lg"
               >
-                <FiBell className="w-5 h-5" />
+                <FiBell className="w-4 sm:w-5 h-4 sm:h-5" />
                 {notifications > 0 && (
-                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 w-4 sm:w-5 h-4 sm:h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
                     {notifications}
                   </span>
                 )}
               </button>
               
-              {/* Export/Import */}
+              {/* Export/Import - Hidden on mobile */}
               <button
                 onClick={exportData}
-                className="p-2.5 rounded-xl bg-white/50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-700 transition-all duration-300 hover:shadow-lg"
+                className="hidden sm:block p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-white/50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-700 transition-all duration-300 hover:shadow-lg"
                 title="Export Data"
               >
-                <FiDownload className="w-5 h-5" />
+                <FiDownload className="w-4 sm:w-5 h-4 sm:h-5" />
               </button>
               
-              <label className="p-2.5 rounded-xl bg-white/50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-700 transition-all duration-300 hover:shadow-lg cursor-pointer">
-                <FiUpload className="w-5 h-5" />
+              <label className="hidden sm:block p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-white/50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-700 transition-all duration-300 hover:shadow-lg cursor-pointer">
+                <FiUpload className="w-4 sm:w-5 h-4 sm:h-5" />
                 <input
                   type="file"
                   accept=".json"
@@ -300,10 +214,10 @@ const DashboardNew = () => {
               {/* Dark Mode Toggle */}
               <button
                 onClick={toggleDarkMode}
-                className="p-2.5 rounded-xl bg-white/50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-700 transition-all duration-300 hover:shadow-lg"
+                className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-white/50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-700 transition-all duration-300 hover:shadow-lg"
                 aria-label="Toggle dark mode"
               >
-                {isDarkMode ? <FiSun className="w-5 h-5 text-yellow-500" /> : <FiMoon className="w-5 h-5 text-blue-600" />}
+                {isDarkMode ? <FiSun className="w-4 sm:w-5 h-4 sm:h-5 text-yellow-500" /> : <FiMoon className="w-4 sm:w-5 h-4 sm:h-5 text-blue-600" />}
               </button>
               
               {/* Logout */}
@@ -312,9 +226,9 @@ const DashboardNew = () => {
                   logout();
                   navigate('/login');
                 }}
-                className="flex items-center space-x-2 px-4 py-2 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 transition-all duration-300 hover:shadow-lg"
+                className="flex items-center space-x-1 sm:space-x-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 transition-all duration-300 hover:shadow-lg"
               >
-                <FiLogOut className="w-5 h-5" />
+                <FiLogOut className="w-4 sm:w-5 h-4 sm:h-5" />
                 <span className="font-medium hidden sm:inline">Logout</span>
               </button>
             </div>
@@ -378,23 +292,23 @@ const DashboardNew = () => {
         )}
       </AnimatePresence>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-8">
         {/* Tab Navigation */}
-        <div className="flex space-x-2 mb-8 p-2 glass-effect backdrop-blur-xl rounded-2xl shadow-xl">
+        <div className="flex overflow-x-auto space-x-1 sm:space-x-2 mb-4 sm:mb-8 p-1 sm:p-2 glass-effect backdrop-blur-xl rounded-xl sm:rounded-2xl shadow-xl scrollbar-hide">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             return (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex-1 flex items-center justify-center space-x-2 py-4 px-6 rounded-xl font-semibold transition-all duration-300 ${
+                className={`flex-shrink-0 flex flex-col sm:flex-row items-center justify-center space-y-1 sm:space-y-0 sm:space-x-2 py-2 sm:py-4 px-3 sm:px-6 rounded-lg sm:rounded-xl font-semibold transition-all duration-300 ${
                   activeTab === tab.id
                     ? 'tab-active transform scale-105'
                     : 'tab-inactive hover:scale-102'
                 }`}
               >
-                <Icon className="w-6 h-6" />
-                <span className="text-sm md:text-base">{tab.label}</span>
+                <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
+                <span className="text-xs sm:text-sm md:text-base">{tab.label}</span>
               </button>
             );
           })}
@@ -407,7 +321,7 @@ const DashboardNew = () => {
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
           transition={{ duration: 0.3, ease: "easeOut" }}
-          className="glass-effect backdrop-blur-xl rounded-3xl p-6 shadow-2xl border border-white/20"
+          className="glass-effect backdrop-blur-xl rounded-xl sm:rounded-3xl p-3 sm:p-6 shadow-2xl border border-white/20"
         >
           {activeTab === 'stats' && <StatsDashboard />}
           {activeTab === 'todos' && <TodoSection />}

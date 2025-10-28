@@ -351,7 +351,7 @@ const FinanceSection = () => {
             </select>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 mb-4 sm:mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -584,7 +584,7 @@ const FinanceSection = () => {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {budgets.map((budget) => {
                 const spent = transactions
                   .filter(t => t.type === 'expense' && t.category === budget.category)

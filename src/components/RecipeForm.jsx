@@ -105,27 +105,27 @@ const RecipeForm = ({ isOpen, onClose, onSubmit, editingRecipe }) => {
             style={{ pointerEvents: 'none' }}
           >
             <div 
-              className="w-full max-w-2xl my-4 sm:my-8 mx-2 sm:mx-auto min-h-0"
+              className="w-full max-w-2xl my-8 min-h-0"
               style={{ pointerEvents: 'auto' }}
             >
-              <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-2xl p-4 sm:p-6 max-h-[calc(100vh-2rem)] sm:max-h-[calc(100vh-4rem)] overflow-y-auto">
-                <div className="flex items-center justify-between mb-4 sm:mb-6">
-                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 max-h-[calc(100vh-4rem)] overflow-y-auto">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                     {editingRecipe ? 'Edit Recipe' : 'New Recipe'}
                   </h2>
                   <button
                     onClick={onClose}
-                    className="p-1.5 sm:p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                    className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                   >
                     <FiX className="w-5 h-5 text-gray-500 dark:text-gray-400" />
                   </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+                <form onSubmit={handleSubmit} className="space-y-5">
                   {/* Basic Info */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 sm:mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Recipe Name
                       </label>
                       <input
@@ -140,7 +140,7 @@ const RecipeForm = ({ isOpen, onClose, onSubmit, editingRecipe }) => {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 sm:mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Category
                       </label>
                       <select
@@ -150,18 +150,50 @@ const RecipeForm = ({ isOpen, onClose, onSubmit, editingRecipe }) => {
                         className="input-field"
                       >
                         <option value="">Select Category</option>
-                        <option value="breakfast"> Breakfast</option>
-                        <option value="lunch"> Lunch</option>
-                        <option value="dinner"> Dinner</option>
-                        <option value="snack"> Snack</option>
+                        <option value="breakfast">🍳 Breakfast</option>
+                        <option value="lunch">🥗 Lunch</option>
+                        <option value="dinner">🍽️ Dinner</option>
+                        <option value="snack">🍿 Snack</option>
                       </select>
                     </div>
+                  </div>
+
+                  {/* Ingredients */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Ingredients
+                    </label>
+                    <textarea
+                      name="ingredients"
+                      value={formData.ingredients}
+                      onChange={handleChange}
+                      rows="3"
+                      required
+                      className="input-field resize-none"
+                      placeholder="List ingredients, one per line"
+                    />
+                  </div>
+
+                  {/* Instructions */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Instructions
+                    </label>
+                    <textarea
+                      name="instructions"
+                      value={formData.instructions}
+                      onChange={handleChange}
+                      rows="4"
+                      required
+                      className="input-field resize-none"
+                      placeholder="Step-by-step instructions"
+                    />
                   </div>
 
                   {/* Time and Servings */}
                   <div className="grid grid-cols-3 gap-4">
                     <div>
-                      <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 sm:mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Prep Time (min)
                       </label>
                       <input
@@ -175,7 +207,7 @@ const RecipeForm = ({ isOpen, onClose, onSubmit, editingRecipe }) => {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 sm:mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Cook Time (min)
                       </label>
                       <input
@@ -189,7 +221,7 @@ const RecipeForm = ({ isOpen, onClose, onSubmit, editingRecipe }) => {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 sm:mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Servings
                       </label>
                       <input
