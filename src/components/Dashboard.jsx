@@ -54,6 +54,11 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchFinancialData();
+    
+    // Refresh data every 5 seconds to stay in sync
+    const interval = setInterval(fetchFinancialData, 5000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   const fetchFinancialData = async () => {
@@ -64,21 +69,33 @@ const Dashboard = () => {
       const monthEnd = endOfMonth(now);
       const weekStart = startOfWeek(now, { weekStartsOn: 1 });
       
-      // Calculate financial metrics
+      // Calculate total net worth (all time balance)
+      const allIncome = data
+        .filter(t => t.type === 'income')
+        .reduce((sum, t) => sum + t.amount, 0);
+      
+      const allExpenses = data
+        .filter(t => t.type === 'expense')
+        .reduce((sum, t) => sum + t.amount, 0);
+      
+      const netWorth = allIncome - allExpenses;
+      
+      // Calculate financial metrics for current month
       const monthTransactions = data.filter(t => {
         const date = new Date(t.date);
         return date >= monthStart && date <= monthEnd;
       });
 
-      const income = monthTransactions
+      const monthlyIncome = monthTransactions
         .filter(t => t.type === 'income')
         .reduce((sum, t) => sum + t.amount, 0);
       
-      const expenses = monthTransactions
+      const monthlyExpenses = monthTransactions
         .filter(t => t.type === 'expense')
         .reduce((sum, t) => sum + t.amount, 0);
 
-      const savingsRate = income > 0 ? ((income - expenses) / income * 100) : 0;
+      const savedThisMonth = monthlyIncome - monthlyExpenses;
+      const savingsRate = monthlyIncome > 0 ? ((savedThisMonth / monthlyIncome) * 100) : 0;
       
       // Calculate category spending
       const categoryTotals = {};
@@ -128,12 +145,44 @@ const Dashboard = () => {
         ]
       });
 
+      // Calculate week expenses
+      const weekTransactions = data.filter(t => {
+        const date = new Date(t.date);
+        return date >= weekStart && date <= now && t.type === 'expense';
+      });
+      const weekExpense = weekTransactions.reduce((sum, t) => sum + t.amount, 0);
+      
+      // Calculate today's expenses
+      const todayTransactions = data.filter(t => {
+        const date = new Date(t.date);
+        return format(date, 'yyyy-MM-dd') === format(now, 'yyyy-MM-dd') && t.type === 'expense';
+      });
+      const todayExpense = todayTransactions.reduce((sum, t) => sum + t.amount, 0);
+      
+      // Calculate daily average (last 30 days)
+      const thirtyDaysAgo = new Date(now);
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      const last30DaysExpenses = data.filter(t => {
+        const date = new Date(t.date);
+        return date >= thirtyDaysAgo && date <= now && t.type === 'expense';
+      }).reduce((sum, t) => sum + t.amount, 0);
+      const dailyAverage = last30DaysExpenses / 30;
+      
       setFinancialData(prev => ({
         ...prev,
-        monthlyIncome: income,
-        monthlyExpenses: expenses,
+        netWorth: netWorth,
+        monthlyIncome: monthlyIncome,
+        monthlyExpenses: monthlyExpenses,
         savingsRate: savingsRate.toFixed(1),
-        savedThisMonth: income - expenses,
+        savedThisMonth: savedThisMonth,
+        todayExpense: todayExpense,
+        todayAvg: dailyAverage,
+        weekExpense: weekExpense,
+        burnRate: dailyAverage,
+        dailyAverage: dailyAverage,
+        weeklyProjection: dailyAverage * 7,
+        monthlyProjection: dailyAverage * 30,
+        budgetDaysLeft: monthlyIncome > 0 ? Math.floor((monthlyIncome - monthlyExpenses) / dailyAverage) : 0,
         categorySpending: categoryTotals
       }));
 
@@ -210,7 +259,7 @@ const Dashboard = () => {
             <div>
               <p className="text-purple-100 text-sm mb-2">Total Net Worth</p>
               <h2 className="text-4xl font-bold mb-2">₹{financialData.netWorth.toFixed(2)}</h2>
-              <p className="text-purple-200 text-sm">Across 1 account</p>
+              <p className="text-purple-200 text-sm">All time balance</p>
             </div>
             <div className="bg-white/20 p-3 rounded-xl">
               <FiCreditCard className="w-6 h-6" />
