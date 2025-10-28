@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FiPlus, FiEdit2, FiTrash2, FiDollarSign, FiTrendingUp, FiTrendingDown, FiPieChart, FiCalendar, FiFilter, FiDownload, FiFileText } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiDollarSign, FiTrendingUp, FiTrendingDown, FiPieChart, FiCalendar, FiFilter, FiDownload, FiFileText, FiHome, FiCreditCard, FiTarget, FiInfo, FiHelpCircle, FiMoon } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { financeService } from '../services/api';
@@ -438,46 +438,75 @@ const FinanceSection = () => {
       {/* Transactions View */}
       {activeView === 'transactions' && (
         <div>
+          {/* Header with Currency Selector */}
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center space-x-2">
+              <FiCreditCard className="w-6 h-6 text-purple-600" />
+              <span>Finance</span>
+            </h2>
+            <div className="flex items-center space-x-3">
+              <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                <FiMoon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+              </button>
+              <select className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
+                <option value="INR">₹ INR</option>
+                <option value="USD">$ USD</option>
+                <option value="EUR">€ EUR</option>
+              </select>
+              <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                <FiFilter className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+              </button>
+              <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                <FiDownload className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+              </button>
+            </div>
+          </div>
+
+          {/* Icon Navigation Tabs */}
+          <div className="flex justify-center mb-6">
+            <div className="flex items-center space-x-2 bg-gray-100 dark:bg-gray-800 rounded-xl p-1">
+              <button className="p-3 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
+                <FiHome className="w-5 h-5 text-purple-600" />
+              </button>
+              <button className="p-3 hover:bg-white dark:hover:bg-gray-700 rounded-lg transition-colors">
+                <FiDollarSign className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+              </button>
+              <button className="p-3 hover:bg-white dark:hover:bg-gray-700 rounded-lg transition-colors">
+                <FiCreditCard className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+              </button>
+              <button className="p-3 hover:bg-white dark:hover:bg-gray-700 rounded-lg transition-colors">
+                <FiTarget className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+              </button>
+              <button className="p-3 hover:bg-white dark:hover:bg-gray-700 rounded-lg transition-colors">
+                <FiInfo className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+              </button>
+              <button className="p-3 hover:bg-white dark:hover:bg-gray-700 rounded-lg transition-colors">
+                <FiHelpCircle className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+              </button>
+            </div>
+          </div>
+
+          {/* Transactions Section */}
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 mb-6 shadow-sm">
             <div className="flex justify-between items-center mb-4">
-              <select
-                value={filterType}
-                onChange={(e) => setFilterType(e.target.value)}
-                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              >
-                <option value="all">All Transactions</option>
-                <option value="income">Income Only</option>
-                <option value="expense">Expenses Only</option>
-              </select>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Transactions</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  Total: {filteredTransactions.length} transactions
+                </p>
+              </div>
               <button
                 onClick={() => {
                   setEditingTransaction(null);
                   setIsTransactionFormOpen(true);
                 }}
-                className="btn-primary flex items-center space-x-2"
+                className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
               >
                 <FiPlus className="w-5 h-5" />
-                <span>Add Transaction</span>
+                <span>Add</span>
               </button>
             </div>
             
-            {/* PDF Download Buttons */}
-            <div className="flex space-x-2">
-              <button
-                onClick={() => generatePDFReport('week')}
-                className="flex items-center space-x-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm transition-colors"
-              >
-                <FiFileText className="w-4 h-4" />
-                <span>Download Weekly</span>
-              </button>
-              <button
-                onClick={() => generatePDFReport('month')}
-                className="flex items-center space-x-2 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm transition-colors"
-              >
-                <FiFileText className="w-4 h-4" />
-                <span>Download Monthly</span>
-              </button>
-            </div>
           </div>
 
           <div className="space-y-2">
@@ -488,74 +517,63 @@ const FinanceSection = () => {
                 </p>
               </div>
             ) : (
-              <AnimatePresence>
+              <div className="space-y-3">
                 {filteredTransactions.map((transaction) => (
-                  <motion.div
+                  <div
                     key={transaction.id}
-                    layout
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 20 }}
-                    className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 hover:shadow-md transition-shadow"
+                    className="bg-white dark:bg-gray-800 rounded-xl p-4 hover:shadow-md transition-shadow"
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4">
-                        <div className={`p-2 rounded-full ${
-                          transaction.type === 'income' 
-                            ? 'bg-green-100 dark:bg-green-900/30' 
-                            : 'bg-red-100 dark:bg-red-900/30'
-                        }`}>
-                          {transaction.type === 'income' ? (
-                            <FiTrendingUp className="w-5 h-5 text-green-600 dark:text-green-400" />
-                          ) : (
-                            <FiTrendingDown className="w-5 h-5 text-red-600 dark:text-red-400" />
-                          )}
-                        </div>
-                        <div>
-                          <p className="font-medium text-gray-900 dark:text-white">
-                            {transaction.description || transaction.category}
-                          </p>
-                          <div className="flex items-center space-x-3 text-sm text-gray-500 dark:text-gray-400">
-                            <span>{transaction.category}</span>
-                            <span>•</span>
-                            <span className="flex items-center">
-                              <FiCalendar className="w-3 h-3 mr-1" />
-                              {format(new Date(transaction.date), 'MMM dd, yyyy')}
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <h4 className="font-semibold text-gray-900 dark:text-white">
+                              {transaction.description}
+                            </h4>
+                            <div className="flex items-center space-x-2 mt-1">
+                              <span className="text-sm text-gray-500 dark:text-gray-400">
+                                {format(new Date(transaction.date), 'dd/MM/yyyy')}
+                              </span>
+                              <span className="text-sm text-gray-400">•</span>
+                              <span className="text-sm text-gray-500 dark:text-gray-400">
+                                {transaction.category}
+                              </span>
+                              <span className="text-sm text-gray-400">•</span>
+                              <span className="text-sm text-gray-500 dark:text-gray-400">
+                                {transaction.account || 'Jai'}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <span className={`text-lg font-bold ${
+                              transaction.type === 'income'
+                                ? 'text-green-600'
+                                : 'text-red-600'
+                            }`}>
+                              {transaction.type === 'income' ? '+' : '-'}₹{transaction.amount.toFixed(2)}
                             </span>
+                            <button
+                              onClick={() => {
+                                setEditingTransaction(transaction);
+                                setIsTransactionFormOpen(true);
+                              }}
+                              className="p-1.5 text-gray-400 hover:text-blue-600 transition-colors"
+                            >
+                              <FiEdit2 className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteTransaction(transaction.id)}
+                              className="p-1.5 text-gray-400 hover:text-red-600 transition-colors"
+                            >
+                              <FiTrash2 className="w-4 h-4" />
+                            </button>
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center space-x-3">
-                        <span className={`text-xl font-bold ${
-                          transaction.type === 'income'
-                            ? 'text-green-600 dark:text-green-400'
-                            : 'text-red-600 dark:text-red-400'
-                        }`}>
-                          {transaction.type === 'income' ? '+' : '-'}
-                          {formatCurrency(transaction.amount)}
-                        </span>
-                        <div className="flex space-x-1">
-                          <button
-                            onClick={() => {
-                              setEditingTransaction(transaction);
-                              setIsTransactionFormOpen(true);
-                            }}
-                            className="p-1 text-gray-500 hover:text-primary-600 dark:hover:text-primary-400"
-                          >
-                            <FiEdit2 className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteTransaction(transaction.id)}
-                            className="p-1 text-gray-500 hover:text-red-600"
-                          >
-                            <FiTrash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
                     </div>
-                  </motion.div>
+                  </div>
                 ))}
-              </AnimatePresence>
+              </div>
             )}
           </div>
         </div>

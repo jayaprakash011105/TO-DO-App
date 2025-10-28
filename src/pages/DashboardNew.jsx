@@ -10,11 +10,12 @@ import FinanceSection from '../components/FinanceSection';
 import UserProfile from '../components/UserProfile';
 import PomodoroTimer from '../components/PomodoroTimer';
 import HabitTracker from '../components/HabitTracker';
+import Dashboard from '../components/Dashboard';
 import { recipeService } from '../services/api';
 import toast from 'react-hot-toast';
 import { 
   FiLogOut, FiSun, FiMoon, FiCheckSquare, FiFileText, 
-  FiBook, FiDollarSign, FiUser, FiSearch,
+  FiBook, FiDollarSign, FiUser, FiSearch, FiHome,
   FiCommand, FiBell, FiDownload, FiUpload, FiClock,
   FiCalendar, FiTarget
 } from 'react-icons/fi';
@@ -23,7 +24,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 const DashboardNew = () => {
   const { user, logout } = useAuth();
   const { isDarkMode, toggleDarkMode } = useTheme();
-  const [activeTab, setActiveTab] = useState('todos');
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [showProfile, setShowProfile] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
@@ -59,6 +60,7 @@ const DashboardNew = () => {
   };
 
   const tabs = [
+    { id: 'dashboard', label: 'Dashboard', icon: FiHome },
     { id: 'todos', label: 'Tasks', icon: FiCheckSquare },
     { id: 'habits', label: 'Habits', icon: FiTarget },
     { id: 'notes', label: 'Notes', icon: FiFileText },
@@ -321,6 +323,7 @@ const DashboardNew = () => {
           transition={{ duration: 0.3, ease: "easeOut" }}
           className="glass-effect backdrop-blur-xl rounded-xl sm:rounded-3xl p-3 sm:p-6 shadow-2xl border border-white/20"
         >
+          {activeTab === 'dashboard' && <Dashboard />}
           {activeTab === 'todos' && <TodoSection />}
           {activeTab === 'habits' && <HabitTracker />}
           {activeTab === 'notes' && <NotesSection />}
