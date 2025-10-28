@@ -11,9 +11,8 @@ import UserProfile from '../components/UserProfile';
 import StatsDashboard from '../components/StatsDashboard';
 import PomodoroTimer from '../components/PomodoroTimer';
 import HabitTracker from '../components/HabitTracker';
-import BottomNavBar from '../components/BottomNavBar';
 import MobileLayout from '../components/MobileLayout';
-import { useResponsive } from '../components/MobileResponsive';
+import { MobileStatsGrid, FinancialCard } from '../components/MobileCards';
 import { recipeService } from '../services/api';
 import toast from 'react-hot-toast';
 import { 
@@ -70,17 +69,6 @@ const DashboardNew = () => {
     { id: 'recipes', label: 'Recipes', icon: FiBook },
     { id: 'finance', label: 'Finance', icon: FiDollarSign },
   ];
-
-  // Check if mobile
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
-  
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 640);
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -152,7 +140,19 @@ const DashboardNew = () => {
     }
   };
 
-  // Use mobile layout for mobile devices
+  // Check if mobile
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Mobile Layout
   if (isMobile) {
     return (
       <div className={isDarkMode ? 'dark' : ''}>
@@ -161,21 +161,58 @@ const DashboardNew = () => {
           setActiveTab={setActiveTab}
           tabs={tabs}
           user={user}
+          isDarkMode={isDarkMode}
+          toggleDarkMode={toggleDarkMode}
+          logout={logout}
+          showProfile={showProfile}
+          setShowProfile={setShowProfile}
         >
-          {activeTab === 'todos' && <TodoSection />}
-          {activeTab === 'habits' && <HabitTracker />}
-          {activeTab === 'notes' && <NotesSection />}
-          {activeTab === 'recipes' && (
-            <RecipesSection 
-              onOpenForm={openRecipeForm}
-              recipes={recipes}
-              setRecipes={setRecipes}
-            />
-          )}
-          {activeTab === 'finance' && <FinanceSection />}
+          {/* Mobile Content */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.2 }}
+            >
+              {activeTab === 'stats' && (
+                <div>
+                  <MobileStatsGrid stats={{
+                    todayTasks: 8,
+                    weeklyProgress: 65,
+                    productivity: 82,
+                    totalItems: 24
+                  }} />
+                  <div className="grid grid-cols-1 gap-3">
+                    <FinancialCard type="income" amount={1200} trend={12} />
+                    <FinancialCard type="expense" amount={482} trend={-8} />
+                  </div>
+                </div>
+              )}
+              {activeTab === 'todos' && <TodoSection />}
+              {activeTab === 'habits' && <HabitTracker />}
+              {activeTab === 'notes' && <NotesSection />}
+              {activeTab === 'recipes' && (
+                <RecipesSection 
+                  onOpenForm={openRecipeForm}
+                  recipes={recipes}
+                  setRecipes={setRecipes}
+                />
+              )}
+              {activeTab === 'finance' && <FinanceSection />}
+            </motion.div>
+          </AnimatePresence>
         </MobileLayout>
+
+        {/* Modals */}
+        {showProfile && (
+          <UserProfile
+            user={user}
+            onClose={() => setShowProfile(false)}
+          />
+        )}
         
-        {/* Recipe Form Modal */}
         <RecipeForm
           isOpen={recipeFormOpen}
           onClose={() => {
@@ -189,6 +226,7 @@ const DashboardNew = () => {
     );
   }
 
+  // Desktop Layout
   return (
     <div className={`min-h-screen ${isDarkMode ? 'dark bg-gray-900' : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50'}`}>
       {/* Header */}
@@ -340,9 +378,9 @@ const DashboardNew = () => {
         )}
       </AnimatePresence>
 
-      <main className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-2 sm:py-8 pb-20 sm:pb-8">
-        {/* Desktop Tab Navigation */}
-        <div className="hidden sm:flex space-x-2 mb-8 p-2 glass-effect backdrop-blur-xl rounded-2xl shadow-xl">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Tab Navigation */}
+        <div className="flex space-x-2 mb-8 p-2 glass-effect backdrop-blur-xl rounded-2xl shadow-xl">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             return (
@@ -362,29 +400,6 @@ const DashboardNew = () => {
           })}
         </div>
 
-        {/* Mobile Tab Navigation - Horizontal Scroll */}
-        <div className="sm:hidden mb-4 -mx-2">
-          <div className="flex overflow-x-auto scrollbar-hide px-2 space-x-2">
-            {tabs.map((tab) => {
-              const Icon = tab.icon;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center space-x-1 px-3 py-2 rounded-lg whitespace-nowrap transition-all ${
-                    activeTab === tab.id
-                      ? 'bg-primary-600 text-white'
-                      : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
-                  }`}
-                >
-                  <Icon className="w-4 h-4" />
-                  <span className="text-xs">{tab.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
         {/* Content */}
         <motion.div
           key={activeTab}
@@ -392,7 +407,7 @@ const DashboardNew = () => {
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
           transition={{ duration: 0.3, ease: "easeOut" }}
-          className="glass-effect backdrop-blur-xl rounded-xl sm:rounded-3xl p-3 sm:p-6 shadow-2xl border border-white/20"
+          className="glass-effect backdrop-blur-xl rounded-3xl p-6 shadow-2xl border border-white/20"
         >
           {activeTab === 'stats' && <StatsDashboard />}
           {activeTab === 'todos' && <TodoSection />}
@@ -418,13 +433,6 @@ const DashboardNew = () => {
         }}
         onSubmit={handleRecipeSubmit}
         editingRecipe={editingRecipe}
-      />
-
-      {/* Mobile Bottom Navigation */}
-      <BottomNavBar 
-        tabs={tabs}
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
       />
     </div>
   );

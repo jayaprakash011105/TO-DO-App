@@ -9,13 +9,19 @@
   display: none;
 }
 
-/* Safe area for iOS devices */
-.safe-area-bottom {
+/* Safe area insets for mobile devices */
+.safe-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-bottom {
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-.safe-area-top {
-  padding-top: env(safe-area-inset-top);
+/* Mobile viewport height fix */
+.h-screen-mobile {
+  height: 100vh;
+  height: -webkit-fill-available;
 }
 
 /* Prevent body scroll on mobile when modal is open */
