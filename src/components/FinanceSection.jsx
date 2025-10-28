@@ -438,24 +438,44 @@ const FinanceSection = () => {
       {/* Transactions View */}
       {activeView === 'transactions' && (
         <div>
-          {/* Transactions Section */}
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 mb-6 shadow-sm">
             <div className="flex justify-between items-center mb-4">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Transactions</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                  Total: {filteredTransactions.length} transactions
-                </p>
-              </div>
+              <select
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value)}
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              >
+                <option value="all">All Transactions</option>
+                <option value="income">Income Only</option>
+                <option value="expense">Expenses Only</option>
+              </select>
               <button
                 onClick={() => {
                   setEditingTransaction(null);
                   setIsTransactionFormOpen(true);
                 }}
-                className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
+                className="btn-primary flex items-center space-x-2"
               >
                 <FiPlus className="w-5 h-5" />
-                <span>Add</span>
+                <span>Add Transaction</span>
+              </button>
+            </div>
+            
+            {/* PDF Download Buttons */}
+            <div className="flex space-x-2">
+              <button
+                onClick={() => generatePDFReport('week')}
+                className="flex items-center space-x-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm transition-colors"
+              >
+                <FiFileText className="w-4 h-4" />
+                <span>Download Weekly</span>
+              </button>
+              <button
+                onClick={() => generatePDFReport('month')}
+                className="flex items-center space-x-2 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm transition-colors"
+              >
+                <FiFileText className="w-4 h-4" />
+                <span>Download Monthly</span>
               </button>
             </div>
             

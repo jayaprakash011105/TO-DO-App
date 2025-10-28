@@ -17,7 +17,7 @@ import {
   FiLogOut, FiSun, FiMoon, FiCheckSquare, FiFileText, 
   FiBook, FiDollarSign, FiUser, FiSearch, FiHome,
   FiCommand, FiBell, FiDownload, FiUpload, FiClock,
-  FiCalendar, FiTarget, FiCreditCard, FiFilter, FiHelpCircle
+  FiCalendar, FiTarget
 } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -141,101 +141,96 @@ const DashboardNew = () => {
   return (
     <div className={`min-h-screen ${isDarkMode ? 'dark bg-gray-900' : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50'}`}>
       {/* Header */}
-      <header className="bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200 dark:border-gray-700">
+      <header className="glass-effect backdrop-blur-xl shadow-xl border-b border-white/20">
         <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
-          <div className="flex flex-col">
-            {/* Top Header */}
-            <div className="flex items-center justify-between py-3">
-              <div className="flex items-center space-x-3">
-                <FiCreditCard className="w-6 h-6 text-purple-600" />
-                <h1 className="text-xl font-semibold text-gray-900 dark:text-white">Finance</h1>
+          <div className="flex items-center justify-between h-16 sm:h-20">
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              <button
+                onClick={() => setShowProfile(true)}
+                className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-base sm:text-lg hover:shadow-lg transition-shadow flex-shrink-0"
+              >
+                {user?.username?.charAt(0).toUpperCase()}
+              </button>
+              <div className="hidden sm:block">
+                <h1 className="text-xl sm:text-2xl font-bold gradient-text">My Workspace</h1>
+                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                  Welcome back, {user?.username}!
+                </p>
               </div>
-              <div className="flex items-center space-x-2">
-                <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
-                  <FiMoon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                </button>
-                <select className="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm">
-                  <option value="INR">₹ INR</option>
-                  <option value="USD">$ USD</option>
-                  <option value="EUR">€ EUR</option>
-                </select>
-                <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
-                  <FiFilter className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                </button>
-                <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
-                  <FiDownload className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                </button>
+              <div className="block sm:hidden">
+                <h1 className="text-lg font-bold gradient-text">Workspace</h1>
               </div>
             </div>
-            {/* Icon Navigation Bar */}
-            <div className="flex justify-center py-3 border-t border-gray-200 dark:border-gray-700">
-              <div className="flex items-center space-x-2 bg-gray-100 dark:bg-gray-800 rounded-xl p-1">
-                <button 
-                  onClick={() => setActiveTab('dashboard')}
-                  className={`p-3 rounded-lg transition-colors ${
-                    activeTab === 'dashboard' 
-                      ? 'bg-white dark:bg-gray-700 shadow-sm' 
-                      : 'hover:bg-white/50 dark:hover:bg-gray-700/50'
-                  }`}
-                >
-                  <FiHome className={`w-5 h-5 ${
-                    activeTab === 'dashboard' ? 'text-purple-600' : 'text-gray-600 dark:text-gray-400'
-                  }`} />
-                </button>
-                <button 
-                  onClick={() => setActiveTab('finance')}
-                  className={`p-3 rounded-lg transition-colors ${
-                    activeTab === 'finance' 
-                      ? 'bg-white dark:bg-gray-700 shadow-sm' 
-                      : 'hover:bg-white/50 dark:hover:bg-gray-700/50'
-                  }`}
-                >
-                  <FiDollarSign className={`w-5 h-5 ${
-                    activeTab === 'finance' ? 'text-purple-600' : 'text-gray-600 dark:text-gray-400'
-                  }`} />
-                </button>
-                <button 
-                  onClick={() => setActiveTab('todos')}
-                  className={`p-3 rounded-lg transition-colors ${
-                    activeTab === 'todos' 
-                      ? 'bg-white dark:bg-gray-700 shadow-sm' 
-                      : 'hover:bg-white/50 dark:hover:bg-gray-700/50'
-                  }`}
-                >
-                  <FiCheckSquare className={`w-5 h-5 ${
-                    activeTab === 'todos' ? 'text-purple-600' : 'text-gray-600 dark:text-gray-400'
-                  }`} />
-                </button>
-                <button 
-                  onClick={() => setActiveTab('habits')}
-                  className={`p-3 rounded-lg transition-colors ${
-                    activeTab === 'habits' 
-                      ? 'bg-white dark:bg-gray-700 shadow-sm' 
-                      : 'hover:bg-white/50 dark:hover:bg-gray-700/50'
-                  }`}
-                >
-                  <FiTarget className={`w-5 h-5 ${
-                    activeTab === 'habits' ? 'text-purple-600' : 'text-gray-600 dark:text-gray-400'
-                  }`} />
-                </button>
-                <button 
-                  onClick={() => setActiveTab('notes')}
-                  className={`p-3 rounded-lg transition-colors ${
-                    activeTab === 'notes' 
-                      ? 'bg-white dark:bg-gray-700 shadow-sm' 
-                      : 'hover:bg-white/50 dark:hover:bg-gray-700/50'
-                  }`}
-                >
-                  <FiFileText className={`w-5 h-5 ${
-                    activeTab === 'notes' ? 'text-purple-600' : 'text-gray-600 dark:text-gray-400'
-                  }`} />
-                </button>
-                <button 
-                  className="p-3 hover:bg-white/50 dark:hover:bg-gray-700/50 rounded-lg transition-colors"
-                >
-                  <FiHelpCircle className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                </button>
-              </div>
+            <div className="flex items-center space-x-1 sm:space-x-3">
+              {/* Pomodoro Timer - Hidden on mobile */}
+              <button
+                onClick={() => setShowPomodoro(true)}
+                className="hidden sm:block p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-white/50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-700 transition-all duration-300 hover:shadow-lg"
+                title="Pomodoro Timer"
+              >
+                <FiClock className="w-4 sm:w-5 h-4 sm:h-5" />
+              </button>
+              
+              {/* Search Button */}
+              <button
+                onClick={() => setShowSearch(!showSearch)}
+                className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-white/50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-700 transition-all duration-300 hover:shadow-lg"
+                title="Search (Ctrl+K)"
+              >
+                <FiSearch className="w-4 sm:w-5 h-4 sm:h-5" />
+              </button>
+              
+              {/* Notifications - Hidden on mobile */}
+              <button
+                className="hidden sm:block relative p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-white/50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-700 transition-all duration-300 hover:shadow-lg"
+              >
+                <FiBell className="w-4 sm:w-5 h-4 sm:h-5" />
+                {notifications > 0 && (
+                  <span className="absolute -top-1 -right-1 w-4 sm:w-5 h-4 sm:h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                    {notifications}
+                  </span>
+                )}
+              </button>
+              
+              {/* Export/Import - Hidden on mobile */}
+              <button
+                onClick={exportData}
+                className="hidden sm:block p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-white/50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-700 transition-all duration-300 hover:shadow-lg"
+                title="Export Data"
+              >
+                <FiDownload className="w-4 sm:w-5 h-4 sm:h-5" />
+              </button>
+              
+              <label className="hidden sm:block p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-white/50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-700 transition-all duration-300 hover:shadow-lg cursor-pointer">
+                <FiUpload className="w-4 sm:w-5 h-4 sm:h-5" />
+                <input
+                  type="file"
+                  accept=".json"
+                  onChange={importData}
+                  className="hidden"
+                />
+              </label>
+              
+              {/* Dark Mode Toggle */}
+              <button
+                onClick={toggleDarkMode}
+                className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-white/50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-700 transition-all duration-300 hover:shadow-lg"
+                aria-label="Toggle dark mode"
+              >
+                {isDarkMode ? <FiSun className="w-4 sm:w-5 h-4 sm:h-5 text-yellow-500" /> : <FiMoon className="w-4 sm:w-5 h-4 sm:h-5 text-blue-600" />}
+              </button>
+              
+              {/* Logout */}
+              <button
+                onClick={() => {
+                  logout();
+                  navigate('/login');
+                }}
+                className="flex items-center space-x-1 sm:space-x-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 transition-all duration-300 hover:shadow-lg"
+              >
+                <FiLogOut className="w-4 sm:w-5 h-4 sm:h-5" />
+                <span className="font-medium hidden sm:inline">Logout</span>
+              </button>
             </div>
           </div>
         </div>
@@ -298,6 +293,28 @@ const DashboardNew = () => {
       </AnimatePresence>
 
       <main className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-8">
+        {/* Tab Navigation - Icon Only */}
+        <div className="flex justify-center mb-6">
+          <div className="flex items-center space-x-2 bg-gray-100 dark:bg-gray-800 rounded-xl p-1">
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`p-3 rounded-lg transition-all duration-200 ${
+                    activeTab === tab.id
+                      ? 'bg-white dark:bg-gray-700 shadow-sm text-purple-600 dark:text-purple-400'
+                      : 'hover:bg-white/50 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-400'
+                  }`}
+                  title={tab.label}
+                >
+                  <Icon className="w-5 h-5" />
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
         {/* Content */}
         <motion.div
