@@ -340,8 +340,8 @@ const DashboardNew = () => {
                 >
                   <Icon className="w-5 h-5" />
                   {tab.id === 'todos' && pendingTasksCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-pulse">
-                      {pendingTasksCount > 99 ? '99+' : pendingTasksCount}
+                    <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center animate-pulse">
+                      {pendingTasksCount > 9 ? '9+' : pendingTasksCount}
                     </span>
                   )}
                 </button>
