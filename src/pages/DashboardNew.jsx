@@ -33,6 +33,7 @@ const DashboardNew = () => {
   const [recipeFormOpen, setRecipeFormOpen] = useState(false);
   const [editingRecipe, setEditingRecipe] = useState(null);
   const [recipes, setRecipes] = useState([]);
+  const [pendingTasksCount, setPendingTasksCount] = useState(0);
   const navigate = useNavigate();
 
   // Recipe form handlers
@@ -67,6 +68,31 @@ const DashboardNew = () => {
     { id: 'notes', label: 'Notes', icon: FiFileText },
     { id: 'recipes', label: 'Recipes', icon: FiBook },
   ];
+
+  // Load pending tasks count
+  useEffect(() => {
+    const loadPendingTasksCount = () => {
+      const todos = JSON.parse(localStorage.getItem('todo_app_todos') || '[]');
+      const userTodos = todos.filter(todo => todo.userId === user?.id && !todo.completed);
+      setPendingTasksCount(userTodos.length);
+    };
+
+    loadPendingTasksCount();
+    
+    // Set up interval to check for updates
+    const interval = setInterval(loadPendingTasksCount, 2000);
+    
+    // Listen for storage changes
+    const handleStorageChange = () => {
+      loadPendingTasksCount();
+    };
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [user]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -305,7 +331,7 @@ const DashboardNew = () => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`p-3 rounded-lg transition-all duration-200 ${
+                  className={`p-3 rounded-lg transition-all duration-200 relative ${
                     activeTab === tab.id
                       ? 'bg-white dark:bg-gray-700 shadow-sm text-purple-600 dark:text-purple-400'
                       : 'hover:bg-white/50 dark:hover:bg-gray-700/50 text-gray-600 dark:text-gray-400'
@@ -313,6 +339,11 @@ const DashboardNew = () => {
                   title={tab.label}
                 >
                   <Icon className="w-5 h-5" />
+                  {tab.id === 'todos' && pendingTasksCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-pulse">
+                      {pendingTasksCount > 99 ? '99+' : pendingTasksCount}
+                    </span>
+                  )}
                 </button>
               );
             })}
