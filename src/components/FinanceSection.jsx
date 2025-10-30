@@ -11,13 +11,16 @@ import 'jspdf-autotable';
 const FinanceSection = () => {
   const [transactions, setTransactions] = useState([]);
   const [budgets, setBudgets] = useState([]);
+  const [savings, setSavings] = useState([]);
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeView, setActiveView] = useState('overview');
   const [isTransactionFormOpen, setIsTransactionFormOpen] = useState(false);
   const [isBudgetFormOpen, setIsBudgetFormOpen] = useState(false);
+  const [isSavingsFormOpen, setIsSavingsFormOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState(null);
   const [editingBudget, setEditingBudget] = useState(null);
+  const [editingSaving, setEditingSaving] = useState(null);
   const [filterType, setFilterType] = useState('all');
   const [filterPeriod, setFilterPeriod] = useState('month');
   const [reportPeriod, setReportPeriod] = useState('week');
@@ -33,7 +36,19 @@ const FinanceSection = () => {
 
   useEffect(() => {
     fetchData();
+    loadSavings();
   }, [filterPeriod]);
+
+  const loadSavings = () => {
+    const storedSavings = localStorage.getItem('finance_savings');
+    if (storedSavings) {
+      setSavings(JSON.parse(storedSavings));
+    }
+  };
+
+  const saveSavingsToStorage = (savingsData) => {
+    localStorage.setItem('finance_savings', JSON.stringify(savingsData));
+  };
 
   const generatePDFReport = (period = 'week') => {
     const doc = new jsPDF();
@@ -313,6 +328,16 @@ const FinanceSection = () => {
           }`}
         >
           Budgets
+        </button>
+        <button
+          onClick={() => setActiveView('savings')}
+          className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all duration-200 ${
+            activeView === 'savings'
+              ? 'bg-white dark:bg-gray-700 text-primary-600 dark:text-primary-400 shadow-sm'
+              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+          }`}
+        >
+          Savings
         </button>
       </div>
 
@@ -663,6 +688,279 @@ const FinanceSection = () => {
           )}
         </div>
       )}
+
+      {/* Savings View */}
+      {activeView === 'savings' && (
+        <div>
+          {/* Overall Savings Summary */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-6 text-white"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm font-medium opacity-90">Total Savings</p>
+                <FiDollarSign className="w-5 h-5 opacity-80" />
+              </div>
+              <p className="text-3xl font-bold">
+                ₹{savings.reduce((sum, s) => sum + s.amount, 0).toFixed(2)}
+              </p>
+              <p className="text-xs opacity-80 mt-1">All time</p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">This Month</p>
+                <FiCalendar className="w-5 h-5 text-blue-500" />
+              </div>
+              <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+                ₹{savings
+                  .filter(s => {
+                    const date = new Date(s.date);
+                    const now = new Date();
+                    return date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+                  })
+                  .reduce((sum, s) => sum + s.amount, 0)
+                  .toFixed(2)}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                {format(new Date(), 'MMMM yyyy')}
+              </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Weekly Average</p>
+                <FiTrendingUp className="w-5 h-5 text-purple-500" />
+              </div>
+              <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">
+                ₹{savings.length > 0 
+                  ? (savings.reduce((sum, s) => sum + s.amount, 0) / Math.max(1, Math.ceil(savings.length / 4))).toFixed(2)
+                  : '0.00'}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Based on entries</p>
+            </motion.div>
+          </div>
+
+          {/* Add/Edit Savings Button */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-4 mb-6 shadow-sm">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Weekly Savings</h3>
+              <button
+                onClick={() => {
+                  setEditingSaving(null);
+                  setIsSavingsFormOpen(true);
+                }}
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center gap-2 transition-colors"
+              >
+                <FiPlus className="w-4 h-4" />
+                <span>Add Savings</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Savings List */}
+          <div className="space-y-3">
+            {savings.length === 0 ? (
+              <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-xl">
+                <p className="text-gray-500 dark:text-gray-400 text-lg">
+                  No savings recorded yet. Start tracking your weekly savings!
+                </p>
+              </div>
+            ) : (
+              savings
+                .sort((a, b) => new Date(b.date) - new Date(a.date))
+                .map((saving) => (
+                  <motion.div
+                    key={saving.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3">
+                          <div className="bg-green-100 dark:bg-green-900/30 p-2 rounded-lg">
+                            <FiDollarSign className="w-5 h-5 text-green-600" />
+                          </div>
+                          <div>
+                            <p className="font-semibold text-gray-900 dark:text-white">
+                              Week of {format(new Date(saving.weekStart), 'MMM dd, yyyy')}
+                            </p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                              Added on {format(new Date(saving.date), 'PPP')}
+                            </p>
+                            {saving.note && (
+                              <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                                {saving.note}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl font-bold text-green-600">
+                          +₹{saving.amount.toFixed(2)}
+                        </span>
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => {
+                              setEditingSaving(saving);
+                              setIsSavingsFormOpen(true);
+                            }}
+                            className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all"
+                          >
+                            <FiEdit2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => {
+                              if (window.confirm('Delete this savings entry?')) {
+                                const updatedSavings = savings.filter(s => s.id !== saving.id);
+                                setSavings(updatedSavings);
+                                saveSavingsToStorage(updatedSavings);
+                                toast.success('Savings entry deleted');
+                              }
+                            }}
+                            className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
+                          >
+                            <FiTrash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Savings Modal */}
+      <AnimatePresence>
+        {isSavingsFormOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+            onClick={() => setIsSavingsFormOpen(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white dark:bg-gray-800 rounded-xl p-6 max-w-md w-full"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
+                {editingSaving ? 'Edit Savings' : 'Add Weekly Savings'}
+              </h2>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const formData = new FormData(e.target);
+                  const savingData = {
+                    id: editingSaving?.id || Date.now().toString(),
+                    amount: parseFloat(formData.get('amount')),
+                    weekStart: formData.get('weekStart'),
+                    date: new Date().toISOString(),
+                    note: formData.get('note')
+                  };
+
+                  let updatedSavings;
+                  if (editingSaving) {
+                    updatedSavings = savings.map(s => 
+                      s.id === editingSaving.id ? savingData : s
+                    );
+                    toast.success('Savings updated');
+                  } else {
+                    updatedSavings = [...savings, savingData];
+                    toast.success('Savings added');
+                  }
+                  
+                  setSavings(updatedSavings);
+                  saveSavingsToStorage(updatedSavings);
+                  setIsSavingsFormOpen(false);
+                  setEditingSaving(null);
+                }}
+              >
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Amount (₹)
+                    </label>
+                    <input
+                      type="number"
+                      name="amount"
+                      step="0.01"
+                      required
+                      defaultValue={editingSaving?.amount || ''}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+                      placeholder="Enter amount saved"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Week Starting Date
+                    </label>
+                    <input
+                      type="date"
+                      name="weekStart"
+                      required
+                      defaultValue={editingSaving?.weekStart || format(startOfWeek(new Date(), { weekStartsOn: 1 }), 'yyyy-MM-dd')}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Note (Optional)
+                    </label>
+                    <textarea
+                      name="note"
+                      rows="3"
+                      defaultValue={editingSaving?.note || ''}
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+                      placeholder="Add any notes about this savings"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-3 mt-6">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsSavingsFormOpen(false);
+                      setEditingSaving(null);
+                    }}
+                    className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+                  >
+                    {editingSaving ? 'Update' : 'Add'} Savings
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Transaction Modal */}
       <AnimatePresence>
