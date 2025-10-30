@@ -298,49 +298,48 @@ const FinanceSection = () => {
   return (
     <div>
       {/* Navigation Tabs */}
-      <div className="overflow-x-auto mb-6">
-        <div className="flex space-x-1 bg-gray-100 dark:bg-gray-800 rounded-xl p-1 min-w-fit">
-          <button
-            onClick={() => setActiveView('overview')}
-            className={`flex-shrink-0 py-2 px-3 sm:px-4 rounded-lg text-sm sm:text-base font-medium transition-all duration-200 whitespace-nowrap ${
-              activeView === 'overview'
-                ? 'bg-white dark:bg-gray-700 text-primary-600 dark:text-primary-400 shadow-sm'
-                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-            }`}
-          >
-            Overview
-          </button>
-          <button
-            onClick={() => setActiveView('transactions')}
-            className={`flex-shrink-0 py-2 px-3 sm:px-4 rounded-lg text-sm sm:text-base font-medium transition-all duration-200 whitespace-nowrap ${
-              activeView === 'transactions'
-                ? 'bg-white dark:bg-gray-700 text-primary-600 dark:text-primary-400 shadow-sm'
-                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-            }`}
-          >
-            Transactions
-          </button>
-          <button
-            onClick={() => setActiveView('budgets')}
-            className={`flex-shrink-0 py-2 px-3 sm:px-4 rounded-lg text-sm sm:text-base font-medium transition-all duration-200 whitespace-nowrap ${
-              activeView === 'budgets'
-                ? 'bg-white dark:bg-gray-700 text-primary-600 dark:text-primary-400 shadow-sm'
-                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-            }`}
-          >
-            Budgets
-          </button>
-          <button
-            onClick={() => setActiveView('savings')}
-            className={`flex-shrink-0 py-2 px-3 sm:px-4 rounded-lg text-sm sm:text-base font-medium transition-all duration-200 whitespace-nowrap ${
-              activeView === 'savings'
-                ? 'bg-white dark:bg-gray-700 text-primary-600 dark:text-primary-400 shadow-sm'
-                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-            }`}
-          >
-            Savings
-          </button>
-        </div>
+      <div className="flex space-x-1 mb-6 bg-gray-100 dark:bg-gray-800 rounded-xl p-1 overflow-x-auto">
+        <button
+          onClick={() => setActiveView('overview')}
+          className={`flex-1 min-w-[80px] py-2 px-2 sm:px-4 rounded-lg font-medium text-xs sm:text-base transition-all duration-200 whitespace-nowrap ${
+            activeView === 'overview'
+              ? 'bg-white dark:bg-gray-700 text-primary-600 dark:text-primary-400 shadow-sm'
+              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+          }`}
+        >
+          Overview
+        </button>
+        <button
+          onClick={() => setActiveView('transactions')}
+          className={`flex-1 min-w-[80px] py-2 px-2 sm:px-4 rounded-lg font-medium text-xs sm:text-base transition-all duration-200 whitespace-nowrap ${
+            activeView === 'transactions'
+              ? 'bg-white dark:bg-gray-700 text-primary-600 dark:text-primary-400 shadow-sm'
+              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+          }`}
+        >
+          <span className="hidden sm:inline">Transactions</span>
+          <span className="sm:hidden">Trans.</span>
+        </button>
+        <button
+          onClick={() => setActiveView('budgets')}
+          className={`flex-1 min-w-[80px] py-2 px-2 sm:px-4 rounded-lg font-medium text-xs sm:text-base transition-all duration-200 whitespace-nowrap ${
+            activeView === 'budgets'
+              ? 'bg-white dark:bg-gray-700 text-primary-600 dark:text-primary-400 shadow-sm'
+              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+          }`}
+        >
+          Budgets
+        </button>
+        <button
+          onClick={() => setActiveView('savings')}
+          className={`flex-1 min-w-[80px] py-2 px-2 sm:px-4 rounded-lg font-medium text-xs sm:text-base transition-all duration-200 whitespace-nowrap ${
+            activeView === 'savings'
+              ? 'bg-white dark:bg-gray-700 text-primary-600 dark:text-primary-400 shadow-sm'
+              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+          }`}
+        >
+          Savings
+        </button>
       </div>
 
       {/* Overview View */}
@@ -758,13 +757,13 @@ const FinanceSection = () => {
           {/* Add/Edit Savings Button */}
           <div className="bg-white dark:bg-gray-800 rounded-xl p-4 mb-6 shadow-sm">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Weekly Savings</h3>
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">Weekly Savings</h3>
               <button
                 onClick={() => {
                   setEditingSaving(null);
                   setIsSavingsFormOpen(true);
                 }}
-                className="w-full sm:w-auto px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center justify-center gap-2 transition-colors"
+                className="w-full sm:w-auto px-3 py-2 sm:px-4 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center justify-center gap-2 text-sm sm:text-base transition-colors"
               >
                 <FiPlus className="w-4 h-4" />
                 <span>Add Savings</span>
@@ -792,26 +791,26 @@ const FinanceSection = () => {
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                       <div className="flex-1">
-                        <div className="flex items-start gap-3">
+                        <div className="flex items-start sm:items-center gap-3">
                           <div className="bg-green-100 dark:bg-green-900/30 p-2 rounded-lg flex-shrink-0">
-                            <FiDollarSign className="w-5 h-5 text-green-600" />
+                            <FiDollarSign className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-gray-900 dark:text-white text-sm sm:text-base">
+                            <p className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white break-words">
                               Week of {format(new Date(saving.weekStart), 'MMM dd, yyyy')}
                             </p>
                             <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-                              Added on {format(new Date(saving.date), 'PPP')}
+                              Added on {format(new Date(saving.date), 'PP')}
                             </p>
                             {saving.note && (
-                              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mt-1">
+                              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mt-1 break-words">
                                 {saving.note}
                               </p>
                             )}
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center justify-between sm:justify-end gap-3">
+                      <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3">
                         <span className="text-xl sm:text-2xl font-bold text-green-600">
                           +₹{saving.amount.toFixed(2)}
                         </span>
