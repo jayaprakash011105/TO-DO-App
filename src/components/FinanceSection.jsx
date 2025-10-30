@@ -298,47 +298,49 @@ const FinanceSection = () => {
   return (
     <div>
       {/* Navigation Tabs */}
-      <div className="flex space-x-1 mb-6 bg-gray-100 dark:bg-gray-800 rounded-xl p-1">
-        <button
-          onClick={() => setActiveView('overview')}
-          className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all duration-200 ${
-            activeView === 'overview'
-              ? 'bg-white dark:bg-gray-700 text-primary-600 dark:text-primary-400 shadow-sm'
-              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-          }`}
-        >
-          Overview
-        </button>
-        <button
-          onClick={() => setActiveView('transactions')}
-          className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all duration-200 ${
-            activeView === 'transactions'
-              ? 'bg-white dark:bg-gray-700 text-primary-600 dark:text-primary-400 shadow-sm'
-              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-          }`}
-        >
-          Transactions
-        </button>
-        <button
-          onClick={() => setActiveView('budgets')}
-          className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all duration-200 ${
-            activeView === 'budgets'
-              ? 'bg-white dark:bg-gray-700 text-primary-600 dark:text-primary-400 shadow-sm'
-              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-          }`}
-        >
-          Budgets
-        </button>
-        <button
-          onClick={() => setActiveView('savings')}
-          className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all duration-200 ${
-            activeView === 'savings'
-              ? 'bg-white dark:bg-gray-700 text-primary-600 dark:text-primary-400 shadow-sm'
-              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
-          }`}
-        >
-          Savings
-        </button>
+      <div className="overflow-x-auto mb-6">
+        <div className="flex space-x-1 bg-gray-100 dark:bg-gray-800 rounded-xl p-1 min-w-fit">
+          <button
+            onClick={() => setActiveView('overview')}
+            className={`flex-shrink-0 py-2 px-3 sm:px-4 rounded-lg text-sm sm:text-base font-medium transition-all duration-200 whitespace-nowrap ${
+              activeView === 'overview'
+                ? 'bg-white dark:bg-gray-700 text-primary-600 dark:text-primary-400 shadow-sm'
+                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+            }`}
+          >
+            Overview
+          </button>
+          <button
+            onClick={() => setActiveView('transactions')}
+            className={`flex-shrink-0 py-2 px-3 sm:px-4 rounded-lg text-sm sm:text-base font-medium transition-all duration-200 whitespace-nowrap ${
+              activeView === 'transactions'
+                ? 'bg-white dark:bg-gray-700 text-primary-600 dark:text-primary-400 shadow-sm'
+                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+            }`}
+          >
+            Transactions
+          </button>
+          <button
+            onClick={() => setActiveView('budgets')}
+            className={`flex-shrink-0 py-2 px-3 sm:px-4 rounded-lg text-sm sm:text-base font-medium transition-all duration-200 whitespace-nowrap ${
+              activeView === 'budgets'
+                ? 'bg-white dark:bg-gray-700 text-primary-600 dark:text-primary-400 shadow-sm'
+                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+            }`}
+          >
+            Budgets
+          </button>
+          <button
+            onClick={() => setActiveView('savings')}
+            className={`flex-shrink-0 py-2 px-3 sm:px-4 rounded-lg text-sm sm:text-base font-medium transition-all duration-200 whitespace-nowrap ${
+              activeView === 'savings'
+                ? 'bg-white dark:bg-gray-700 text-primary-600 dark:text-primary-400 shadow-sm'
+                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+            }`}
+          >
+            Savings
+          </button>
+        </div>
       </div>
 
       {/* Overview View */}
@@ -755,14 +757,14 @@ const FinanceSection = () => {
 
           {/* Add/Edit Savings Button */}
           <div className="bg-white dark:bg-gray-800 rounded-xl p-4 mb-6 shadow-sm">
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Weekly Savings</h3>
               <button
                 onClick={() => {
                   setEditingSaving(null);
                   setIsSavingsFormOpen(true);
                 }}
-                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center gap-2 transition-colors"
+                className="w-full sm:w-auto px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg flex items-center justify-center gap-2 transition-colors"
               >
                 <FiPlus className="w-4 h-4" />
                 <span>Add Savings</span>
@@ -788,29 +790,29 @@ const FinanceSection = () => {
                     animate={{ opacity: 1, x: 0 }}
                     className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow"
                   >
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                       <div className="flex-1">
-                        <div className="flex items-center gap-3">
-                          <div className="bg-green-100 dark:bg-green-900/30 p-2 rounded-lg">
+                        <div className="flex items-start gap-3">
+                          <div className="bg-green-100 dark:bg-green-900/30 p-2 rounded-lg flex-shrink-0">
                             <FiDollarSign className="w-5 h-5 text-green-600" />
                           </div>
-                          <div>
-                            <p className="font-semibold text-gray-900 dark:text-white">
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-gray-900 dark:text-white text-sm sm:text-base">
                               Week of {format(new Date(saving.weekStart), 'MMM dd, yyyy')}
                             </p>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                               Added on {format(new Date(saving.date), 'PPP')}
                             </p>
                             {saving.note && (
-                              <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mt-1">
                                 {saving.note}
                               </p>
                             )}
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl font-bold text-green-600">
+                      <div className="flex items-center justify-between sm:justify-end gap-3">
+                        <span className="text-xl sm:text-2xl font-bold text-green-600">
                           +₹{saving.amount.toFixed(2)}
                         </span>
                         <div className="flex items-center gap-1">
@@ -819,9 +821,9 @@ const FinanceSection = () => {
                               setEditingSaving(saving);
                               setIsSavingsFormOpen(true);
                             }}
-                            className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all"
+                            className="p-1.5 sm:p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all"
                           >
-                            <FiEdit2 className="w-4 h-4" />
+                            <FiEdit2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                           </button>
                           <button
                             onClick={() => {
@@ -832,9 +834,9 @@ const FinanceSection = () => {
                                 toast.success('Savings entry deleted');
                               }
                             }}
-                            className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
+                            className="p-1.5 sm:p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
                           >
-                            <FiTrash2 className="w-4 h-4" />
+                            <FiTrash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                           </button>
                         </div>
                       </div>
