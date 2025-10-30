@@ -717,10 +717,37 @@ const FinanceSection = () => {
               className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm"
             >
               <div className="flex items-center justify-between mb-2">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">This Month</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">This Week</p>
                 <FiCalendar className="w-5 h-5 text-blue-500" />
               </div>
               <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+                ₹{savings
+                  .filter(s => {
+                    const saveDate = new Date(s.weekStart);
+                    const now = new Date();
+                    const weekStart = startOfWeek(now, { weekStartsOn: 1 });
+                    const weekEnd = endOfWeek(now, { weekStartsOn: 1 });
+                    return saveDate >= weekStart && saveDate <= weekEnd;
+                  })
+                  .reduce((sum, s) => sum + s.amount, 0)
+                  .toFixed(2)}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                {format(startOfWeek(new Date(), { weekStartsOn: 1 }), 'MMM dd')} - {format(endOfWeek(new Date(), { weekStartsOn: 1 }), 'MMM dd')}
+              </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">This Month</p>
+                <FiTrendingUp className="w-5 h-5 text-purple-500" />
+              </div>
+              <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">
                 ₹{savings
                   .filter(s => {
                     const date = new Date(s.date);
@@ -733,24 +760,6 @@ const FinanceSection = () => {
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 {format(new Date(), 'MMMM yyyy')}
               </p>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm"
-            >
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Weekly Average</p>
-                <FiTrendingUp className="w-5 h-5 text-purple-500" />
-              </div>
-              <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">
-                ₹{savings.length > 0 
-                  ? (savings.reduce((sum, s) => sum + s.amount, 0) / Math.max(1, Math.ceil(savings.length / 4))).toFixed(2)
-                  : '0.00'}
-              </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Based on entries</p>
             </motion.div>
           </div>
 
