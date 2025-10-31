@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/FirebaseAuthContext';
 import { useTheme } from '../contexts/ThemeContext';
+import DataMigration from '../components/DataMigration';
 import TodoSection from '../components/TodoSection';
 import NotesSection from '../components/NotesSection';
 import RecipesSection from '../components/RecipesSection';
@@ -34,6 +35,7 @@ const DashboardNew = () => {
   const [editingRecipe, setEditingRecipe] = useState(null);
   const [recipes, setRecipes] = useState([]);
   const [pendingTasksCount, setPendingTasksCount] = useState(0);
+  const [showMigration, setShowMigration] = useState(false);
   const navigate = useNavigate();
 
   // Recipe form handlers
@@ -69,29 +71,38 @@ const DashboardNew = () => {
     { id: 'recipes', label: 'Recipes', icon: FiBook },
   ];
 
-  // Load pending tasks count
+  // Check for migration on mount
+  useEffect(() => {
+    if (user) {
+      // Check if user has local data that needs migration
+      const checkMigration = () => {
+        const todos = JSON.parse(localStorage.getItem('todo_app_todos') || '[]');
+        const notes = JSON.parse(localStorage.getItem('todo_app_notes') || '[]');
+        const recipes = JSON.parse(localStorage.getItem('todo_app_recipes') || '[]');
+        
+        const hasLocalData = todos.some(t => t.userId === user.id) ||
+                            notes.some(n => n.userId === user.id) ||
+                            recipes.some(r => r.userId === user.id);
+        
+        if (hasLocalData) {
+          setShowMigration(true);
+        }
+      };
+      
+      // Check after a short delay to ensure user is loaded
+      setTimeout(checkMigration, 1000);
+    }
+  }, [user]);
+
+  // Load pending tasks count (now from Firebase)
   useEffect(() => {
     const loadPendingTasksCount = () => {
-      const todos = JSON.parse(localStorage.getItem('todo_app_todos') || '[]');
-      const userTodos = todos.filter(todo => todo.userId === user?.id && !todo.completed);
-      setPendingTasksCount(userTodos.length);
+      // This will now be handled by Firebase real-time listeners
+      // For now, keep it at 0 until Firebase data loads
+      setPendingTasksCount(0);
     };
 
     loadPendingTasksCount();
-    
-    // Set up interval to check for updates
-    const interval = setInterval(loadPendingTasksCount, 2000);
-    
-    // Listen for storage changes
-    const handleStorageChange = () => {
-      loadPendingTasksCount();
-    };
-    window.addEventListener('storage', handleStorageChange);
-    
-    return () => {
-      clearInterval(interval);
-      window.removeEventListener('storage', handleStorageChange);
-    };
   }, [user]);
 
   useEffect(() => {
@@ -384,6 +395,17 @@ const DashboardNew = () => {
         onSubmit={handleRecipeSubmit}
         editingRecipe={editingRecipe}
       />
+
+      {/* Data Migration Modal */}
+      {showMigration && (
+        <DataMigration
+          onClose={() => setShowMigration(false)}
+          onComplete={() => {
+            setShowMigration(false);
+            window.location.reload();
+          }}
+        />
+      )}
     </div>
   );
 };

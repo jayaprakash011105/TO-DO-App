@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { FiPlus, FiEdit2, FiTrash2, FiDollarSign, FiTrendingUp, FiTrendingDown, FiPieChart, FiCalendar, FiFilter, FiDownload, FiFileText, FiHome, FiCreditCard, FiTarget, FiInfo, FiHelpCircle, FiMoon } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
-import { financeService } from '../services/api';
+// Use Firebase API instead of localStorage API
+import { financeService } from '../services/firebaseApi';
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import { TransactionModal, BudgetModal } from './FinanceModals';
 import jsPDF from 'jspdf';

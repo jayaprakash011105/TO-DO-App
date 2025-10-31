@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { FiPlus, FiEdit2, FiTrash2, FiSearch, FiClock, FiUsers } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
-import { recipeService } from '../services/api';
+// Use Firebase API instead of localStorage API
+import { recipeService } from '../services/firebaseApi';
 
 const RecipesSection = ({ onOpenForm, recipes, setRecipes }) => {
   const [searchTerm, setSearchTerm] = useState('');

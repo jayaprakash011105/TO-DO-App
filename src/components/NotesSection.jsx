@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { FiPlus, FiEdit2, FiTrash2, FiSearch } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
+import { noteService } from '../services/firebaseApi';
 import toast from 'react-hot-toast';
-import { noteService } from '../services/api';
 
 const NotesSection = () => {
   const [notes, setNotes] = useState([]);

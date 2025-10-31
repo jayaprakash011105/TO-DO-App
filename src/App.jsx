@@ -1,11 +1,13 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import { AuthProvider } from './contexts/AuthContext';
+// Switch to Firebase Auth Context
+import { AuthProvider } from './contexts/FirebaseAuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import DashboardNew from './pages/DashboardNew';
+import FirebaseTestPage from './components/FirebaseTestPage';
 
 function App() {
   return (
@@ -35,6 +37,7 @@ function App() {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/firebase-test" element={<FirebaseTestPage />} />
             <Route
               path="/dashboard"
               element={

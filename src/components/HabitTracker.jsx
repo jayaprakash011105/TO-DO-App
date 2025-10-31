@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import { habitService } from '../services/firebaseApi';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   FiPlus, FiTrash2, FiEdit2, FiTrendingUp, FiAward,

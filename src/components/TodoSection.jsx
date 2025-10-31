@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { todoService } from '../services/api';
+// Use Firebase API instead of localStorage API
+import { todoService } from '../services/firebaseApi';
 import TodoItem from './TodoItem';
 import TodoForm from './TodoForm';
 import { FiPlus, FiFilter, FiSearch } from 'react-icons/fi';
