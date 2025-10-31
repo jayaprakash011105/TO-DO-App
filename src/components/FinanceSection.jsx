@@ -183,16 +183,44 @@ const FinanceSection = () => {
 
   const fetchData = async () => {
     try {
+      setLoading(true);
       const [transactionsData, budgetsData, summaryData] = await Promise.all([
         financeService.getTransactions(),
         financeService.getBudgets(),
-        financeService.getFinancialSummary(filterPeriod)
+        financeService.getSummary() // Fixed method name
       ]);
-      setTransactions(transactionsData);
-      setBudgets(budgetsData);
-      setSummary(summaryData);
+      
+      console.log('Fetched data:', { transactionsData, budgetsData, summaryData });
+      
+      setTransactions(transactionsData || []);
+      setBudgets(budgetsData || []);
+      // Map the Firebase data to match component expectations
+      setSummary({
+        income: summaryData?.totalIncome || 0,
+        expenses: summaryData?.totalExpenses || 0,
+        balance: summaryData?.balance || 0,
+        monthlyIncome: summaryData?.monthlyIncome || 0,
+        monthlyExpenses: summaryData?.monthlyExpenses || 0,
+        monthlyBalance: summaryData?.monthlyBalance || 0,
+        budgets: summaryData?.budgets || 0,
+        transactions: summaryData?.transactions || 0
+      });
     } catch (error) {
+      console.error('Error fetching financial data:', error);
       toast.error('Failed to fetch financial data');
+      // Set default values on error
+      setTransactions([]);
+      setBudgets([]);
+      setSummary({
+        income: 0,
+        expenses: 0,
+        balance: 0,
+        monthlyIncome: 0,
+        monthlyExpenses: 0,
+        monthlyBalance: 0,
+        budgets: 0,
+        transactions: 0
+      });
     } finally {
       setLoading(false);
     }
