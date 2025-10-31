@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/FirebaseAuthContext';
 import { FiUser, FiMail, FiLock, FiUserPlus } from 'react-icons/fi';
+import { FcGoogle } from 'react-icons/fc';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 
@@ -13,7 +14,7 @@ const Register = () => {
     confirmPassword: '',
   });
   const [loading, setLoading] = useState(false);
-  const { register } = useAuth();
+  const { register, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -37,14 +38,19 @@ const Register = () => {
     }
 
     setLoading(true);
-    const result = await register({
-      username: formData.username,
-      email: formData.email,
-      password: formData.password,
-    });
+    const result = await register(formData.email, formData.password, formData.username);
     
     if (result.success) {
-      navigate('/login');
+      navigate('/');
+    }
+    setLoading(false);
+  };
+
+  const handleGoogleSignup = async () => {
+    setLoading(true);
+    const result = await loginWithGoogle();
+    if (result.success) {
+      navigate('/');
     }
     setLoading(false);
   };
@@ -167,6 +173,26 @@ const Register = () => {
               )}
             </button>
           </form>
+
+          {/* Divider */}
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-4 bg-white text-gray-500">Or continue with</span>
+            </div>
+          </div>
+
+          {/* Google Signup Button */}
+          <button
+            onClick={handleGoogleSignup}
+            disabled={loading}
+            className="w-full flex items-center justify-center space-x-3 py-3 px-4 border border-gray-300 rounded-xl hover:bg-gray-50 transition-all duration-300 group"
+          >
+            <FcGoogle className="w-6 h-6" />
+            <span className="text-gray-700 font-medium">Sign up with Google</span>
+          </button>
 
           <div className="mt-6 text-center">
             <p className="text-gray-600">
