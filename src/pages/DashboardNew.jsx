@@ -12,7 +12,8 @@ import UserProfile from '../components/UserProfile';
 import PomodoroTimer from '../components/PomodoroTimer';
 import HabitTracker from '../components/HabitTracker';
 import Dashboard from '../components/Dashboard';
-import { recipeService } from '../services/api';
+// Use Firebase API instead of localStorage API
+import { recipeService } from '../services/firebaseApi';
 import toast from 'react-hot-toast';
 import { 
   FiLogOut, FiSun, FiMoon, FiCheckSquare, FiFileText, 
@@ -139,39 +140,101 @@ const DashboardNew = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [showSearch]);
 
-  const exportData = () => {
-    const data = {
-      todos: localStorage.getItem(`todos_${user?.id}`) || '[]',
-      notes: localStorage.getItem(`notes_${user?.id}`) || '[]',
-      recipes: localStorage.getItem(`recipes_${user?.id}`) || '[]',
-      profile: localStorage.getItem(`profile_${user?.id}`) || '{}',
-      exportDate: new Date().toISOString()
-    };
+  const exportData = async () => {
+    toast.loading('Exporting data from Firebase...', { id: 'export' });
     
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `workspace-backup-${new Date().toISOString().split('T')[0]}.json`;
-    a.click();
-    toast.success('Data exported successfully!');
+    try {
+      // Import all Firebase services
+      const { todoService, noteService, financeService, habitService } = await import('../services/firebaseApi');
+      
+      // Fetch all data from Firebase
+      const [todos, notes, recipes, transactions, habits] = await Promise.all([
+        todoService.getTodos(),
+        noteService.getNotes(),
+        recipeService.getRecipes(),
+        financeService.getTransactions(),
+        habitService.getHabits()
+      ]);
+      
+      const data = {
+        todos,
+        notes,
+        recipes,
+        transactions,
+        habits,
+        user: {
+          id: user?.id,
+          email: user?.email,
+          username: user?.username
+        },
+        exportDate: new Date().toISOString()
+      };
+      
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `workspace-backup-${new Date().toISOString().split('T')[0]}.json`;
+      a.click();
+      toast.success('Data exported from Firebase successfully!', { id: 'export' });
+    } catch (error) {
+      console.error('Export error:', error);
+      toast.error('Failed to export data', { id: 'export' });
+    }
   };
 
-  const importData = (event) => {
+  const importData = async (event) => {
     const file = event.target.files[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = async (e) => {
         try {
           const data = JSON.parse(e.target.result);
-          if (data.todos) localStorage.setItem(`todos_${user?.id}`, data.todos);
-          if (data.notes) localStorage.setItem(`notes_${user?.id}`, data.notes);
-          if (data.recipes) localStorage.setItem(`recipes_${user?.id}`, data.recipes);
-          if (data.profile) localStorage.setItem(`profile_${user?.id}`, data.profile);
-          toast.success('Data imported successfully!');
-          window.location.reload();
+          toast.loading('Importing data to Firebase...', { id: 'import' });
+          
+          // Import all Firebase services
+          const { todoService, noteService, financeService, habitService } = await import('../services/firebaseApi');
+          
+          // Import todos
+          if (data.todos && Array.isArray(data.todos)) {
+            for (const todo of data.todos) {
+              await todoService.createTodo(todo);
+            }
+          }
+          
+          // Import notes
+          if (data.notes && Array.isArray(data.notes)) {
+            for (const note of data.notes) {
+              await noteService.createNote(note);
+            }
+          }
+          
+          // Import recipes
+          if (data.recipes && Array.isArray(data.recipes)) {
+            for (const recipe of data.recipes) {
+              await recipeService.createRecipe(recipe);
+            }
+          }
+          
+          // Import transactions
+          if (data.transactions && Array.isArray(data.transactions)) {
+            for (const transaction of data.transactions) {
+              await financeService.createTransaction(transaction);
+            }
+          }
+          
+          // Import habits
+          if (data.habits && Array.isArray(data.habits)) {
+            for (const habit of data.habits) {
+              await habitService.createHabit(habit);
+            }
+          }
+          
+          toast.success('Data imported to Firebase successfully!', { id: 'import' });
+          setTimeout(() => window.location.reload(), 1500);
         } catch (error) {
-          toast.error('Invalid file format');
+          console.error('Import error:', error);
+          toast.error('Failed to import data', { id: 'import' });
         }
       };
       reader.readAsText(file);

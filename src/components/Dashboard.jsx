@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { FiTrendingUp, FiTrendingDown, FiDollarSign, FiPieChart, FiCalendar, FiCreditCard, FiTarget, FiActivity } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isToday } from 'date-fns';
-import { financeService } from '../services/api';
+// Use Firebase API instead of localStorage API
+import { financeService } from '../services/firebaseApi';
 import { Line, Pie } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
