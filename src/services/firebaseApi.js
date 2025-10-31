@@ -25,16 +25,36 @@ export const todoService = {
   async getTodos() {
     try {
       const userId = getCurrentUserId();
-      const q = query(
-        collection(db, 'todos'),
-        where('userId', '==', userId),
-        orderBy('createdAt', 'desc')
-      );
-      const snapshot = await getDocs(q);
-      return snapshot.docs.map(doc => ({
+      // Try with orderBy first, fall back to simple query if index not created
+      let snapshot;
+      try {
+        const q = query(
+          collection(db, 'todos'),
+          where('userId', '==', userId),
+          orderBy('createdAt', 'desc')
+        );
+        snapshot = await getDocs(q);
+      } catch (indexError) {
+        // If index error, use simple query without ordering
+        console.log('Index not created yet for todos, using simple query');
+        const q = query(
+          collection(db, 'todos'),
+          where('userId', '==', userId)
+        );
+        snapshot = await getDocs(q);
+      }
+      
+      const todos = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }));
+      
+      // Sort client-side if needed
+      return todos.sort((a, b) => {
+        const dateA = a.createdAt?.toDate?.() || new Date(0);
+        const dateB = b.createdAt?.toDate?.() || new Date(0);
+        return dateB - dateA;
+      });
     } catch (error) {
       console.error('Error fetching todos:', error);
       return [];
@@ -119,16 +139,36 @@ export const noteService = {
   async getNotes() {
     try {
       const userId = getCurrentUserId();
-      const q = query(
-        collection(db, 'notes'),
-        where('userId', '==', userId),
-        orderBy('createdAt', 'desc')
-      );
-      const snapshot = await getDocs(q);
-      return snapshot.docs.map(doc => ({
+      // Try with orderBy first, fall back to simple query if index not created
+      let snapshot;
+      try {
+        const q = query(
+          collection(db, 'notes'),
+          where('userId', '==', userId),
+          orderBy('createdAt', 'desc')
+        );
+        snapshot = await getDocs(q);
+      } catch (indexError) {
+        // If index error, use simple query without ordering
+        console.log('Index not created yet for notes, using simple query');
+        const q = query(
+          collection(db, 'notes'),
+          where('userId', '==', userId)
+        );
+        snapshot = await getDocs(q);
+      }
+      
+      const notes = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }));
+      
+      // Sort client-side if needed
+      return notes.sort((a, b) => {
+        const dateA = a.createdAt?.toDate?.() || new Date(0);
+        const dateB = b.createdAt?.toDate?.() || new Date(0);
+        return dateB - dateA;
+      });
     } catch (error) {
       console.error('Error fetching notes:', error);
       return [];
@@ -189,16 +229,36 @@ export const recipeService = {
   async getRecipes() {
     try {
       const userId = getCurrentUserId();
-      const q = query(
-        collection(db, 'recipes'),
-        where('userId', '==', userId),
-        orderBy('createdAt', 'desc')
-      );
-      const snapshot = await getDocs(q);
-      return snapshot.docs.map(doc => ({
+      // Try with orderBy first, fall back to simple query if index not created
+      let snapshot;
+      try {
+        const q = query(
+          collection(db, 'recipes'),
+          where('userId', '==', userId),
+          orderBy('createdAt', 'desc')
+        );
+        snapshot = await getDocs(q);
+      } catch (indexError) {
+        // If index error, use simple query without ordering
+        console.log('Index not created yet for recipes, using simple query');
+        const q = query(
+          collection(db, 'recipes'),
+          where('userId', '==', userId)
+        );
+        snapshot = await getDocs(q);
+      }
+      
+      const recipes = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }));
+      
+      // Sort client-side if needed
+      return recipes.sort((a, b) => {
+        const dateA = a.createdAt?.toDate?.() || new Date(0);
+        const dateB = b.createdAt?.toDate?.() || new Date(0);
+        return dateB - dateA;
+      });
     } catch (error) {
       console.error('Error fetching recipes:', error);
       return [];
@@ -259,16 +319,36 @@ export const financeService = {
   async getTransactions() {
     try {
       const userId = getCurrentUserId();
-      const q = query(
-        collection(db, 'transactions'),
-        where('userId', '==', userId),
-        orderBy('date', 'desc')
-      );
-      const snapshot = await getDocs(q);
-      return snapshot.docs.map(doc => ({
+      // Try with orderBy first, fall back to simple query if index not created
+      let snapshot;
+      try {
+        const q = query(
+          collection(db, 'transactions'),
+          where('userId', '==', userId),
+          orderBy('date', 'desc')
+        );
+        snapshot = await getDocs(q);
+      } catch (indexError) {
+        // If index error, use simple query without ordering
+        console.log('Index not created yet, using simple query');
+        const q = query(
+          collection(db, 'transactions'),
+          where('userId', '==', userId)
+        );
+        snapshot = await getDocs(q);
+      }
+      
+      const transactions = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }));
+      
+      // Sort client-side if needed
+      return transactions.sort((a, b) => {
+        const dateA = a.date ? new Date(a.date) : new Date(0);
+        const dateB = b.date ? new Date(b.date) : new Date(0);
+        return dateB - dateA;
+      });
     } catch (error) {
       console.error('Error fetching transactions:', error);
       return [];
@@ -326,16 +406,36 @@ export const financeService = {
   async getBudgets() {
     try {
       const userId = getCurrentUserId();
-      const q = query(
-        collection(db, 'budgets'),
-        where('userId', '==', userId),
-        orderBy('createdAt', 'desc')
-      );
-      const snapshot = await getDocs(q);
-      return snapshot.docs.map(doc => ({
+      // Try with orderBy first, fall back to simple query if index not created
+      let snapshot;
+      try {
+        const q = query(
+          collection(db, 'budgets'),
+          where('userId', '==', userId),
+          orderBy('createdAt', 'desc')
+        );
+        snapshot = await getDocs(q);
+      } catch (indexError) {
+        // If index error, use simple query without ordering
+        console.log('Index not created yet for budgets, using simple query');
+        const q = query(
+          collection(db, 'budgets'),
+          where('userId', '==', userId)
+        );
+        snapshot = await getDocs(q);
+      }
+      
+      const budgets = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }));
+      
+      // Sort client-side if needed
+      return budgets.sort((a, b) => {
+        const dateA = a.createdAt?.toDate?.() || new Date(0);
+        const dateB = b.createdAt?.toDate?.() || new Date(0);
+        return dateB - dateA;
+      });
     } catch (error) {
       console.error('Error fetching budgets:', error);
       return [];
@@ -388,6 +488,61 @@ export const financeService = {
       console.error('Error deleting budget:', error);
       throw error;
     }
+  },
+
+  async getSummary() {
+    try {
+      const transactions = await this.getTransactions();
+      const budgets = await this.getBudgets();
+      
+      const now = new Date();
+      const currentMonth = now.getMonth();
+      const currentYear = now.getFullYear();
+      
+      // Calculate totals from transactions
+      let totalIncome = 0;
+      let totalExpenses = 0;
+      let monthlyIncome = 0;
+      let monthlyExpenses = 0;
+      
+      transactions.forEach(transaction => {
+        const amount = parseFloat(transaction.amount) || 0;
+        const transactionDate = transaction.date ? new Date(transaction.date) : new Date();
+        const isCurrentMonth = transactionDate.getMonth() === currentMonth && 
+                              transactionDate.getFullYear() === currentYear;
+        
+        if (transaction.type === 'income') {
+          totalIncome += amount;
+          if (isCurrentMonth) monthlyIncome += amount;
+        } else if (transaction.type === 'expense') {
+          totalExpenses += amount;
+          if (isCurrentMonth) monthlyExpenses += amount;
+        }
+      });
+      
+      return {
+        totalIncome,
+        totalExpenses,
+        balance: totalIncome - totalExpenses,
+        monthlyIncome,
+        monthlyExpenses,
+        monthlyBalance: monthlyIncome - monthlyExpenses,
+        budgets: budgets.length,
+        transactions: transactions.length
+      };
+    } catch (error) {
+      console.error('Error getting financial summary:', error);
+      return {
+        totalIncome: 0,
+        totalExpenses: 0,
+        balance: 0,
+        monthlyIncome: 0,
+        monthlyExpenses: 0,
+        monthlyBalance: 0,
+        budgets: 0,
+        transactions: 0
+      };
+    }
   }
 };
 
@@ -396,16 +551,36 @@ export const habitService = {
   async getHabits() {
     try {
       const userId = getCurrentUserId();
-      const q = query(
-        collection(db, 'habits'),
-        where('userId', '==', userId),
-        orderBy('createdAt', 'desc')
-      );
-      const snapshot = await getDocs(q);
-      return snapshot.docs.map(doc => ({
+      // Try with orderBy first, fall back to simple query if index not created
+      let snapshot;
+      try {
+        const q = query(
+          collection(db, 'habits'),
+          where('userId', '==', userId),
+          orderBy('createdAt', 'desc')
+        );
+        snapshot = await getDocs(q);
+      } catch (indexError) {
+        // If index error, use simple query without ordering
+        console.log('Index not created yet for habits, using simple query');
+        const q = query(
+          collection(db, 'habits'),
+          where('userId', '==', userId)
+        );
+        snapshot = await getDocs(q);
+      }
+      
+      const habits = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }));
+      
+      // Sort client-side if needed
+      return habits.sort((a, b) => {
+        const dateA = a.createdAt?.toDate?.() || new Date(0);
+        const dateB = b.createdAt?.toDate?.() || new Date(0);
+        return dateB - dateA;
+      });
     } catch (error) {
       console.error('Error fetching habits:', error);
       return [];
