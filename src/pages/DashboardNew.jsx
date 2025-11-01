@@ -10,7 +10,6 @@ import RecipeForm from '../components/RecipeForm';
 import FinanceSection from '../components/FinanceSection';
 import UserProfile from '../components/UserProfile';
 import PomodoroTimer from '../components/PomodoroTimer';
-import HabitTracker from '../components/HabitTracker';
 import Dashboard from '../components/Dashboard';
 // Use Firebase API instead of localStorage API
 import { recipeService } from '../services/firebaseApi';
@@ -67,7 +66,6 @@ const DashboardNew = () => {
     { id: 'dashboard', label: 'Dashboard', icon: FiHome },
     { id: 'finance', label: 'Finance', icon: FiDollarSign },
     { id: 'todos', label: 'Tasks', icon: FiCheckSquare },
-    { id: 'habits', label: 'Habits', icon: FiTarget },
     { id: 'notes', label: 'Notes', icon: FiFileText },
     { id: 'recipes', label: 'Recipes', icon: FiBook },
   ];
@@ -124,12 +122,9 @@ const DashboardNew = () => {
             setActiveTab('todos');
             break;
           case '4':
-            setActiveTab('habits');
-            break;
-          case '5':
             setActiveTab('notes');
             break;
-          case '6':
+          case '5':
             setActiveTab('recipes');
             break;
         }
@@ -145,15 +140,14 @@ const DashboardNew = () => {
     
     try {
       // Import all Firebase services
-      const { todoService, noteService, financeService, habitService } = await import('../services/firebaseApi');
+      const { todoService, noteService, financeService } = await import('../services/firebaseApi');
       
       // Fetch all data from Firebase
-      const [todos, notes, recipes, transactions, habits] = await Promise.all([
+      const [todos, notes, recipes, transactions] = await Promise.all([
         todoService.getTodos(),
         noteService.getNotes(),
         recipeService.getRecipes(),
-        financeService.getTransactions(),
-        habitService.getHabits()
+        financeService.getTransactions()
       ]);
       
       const data = {
@@ -161,7 +155,6 @@ const DashboardNew = () => {
         notes,
         recipes,
         transactions,
-        habits,
         user: {
           id: user?.id,
           email: user?.email,
@@ -193,7 +186,7 @@ const DashboardNew = () => {
           toast.loading('Importing data to Firebase...', { id: 'import' });
           
           // Import all Firebase services
-          const { todoService, noteService, financeService, habitService } = await import('../services/firebaseApi');
+          const { todoService, noteService, financeService } = await import('../services/firebaseApi');
           
           // Import todos
           if (data.todos && Array.isArray(data.todos)) {
@@ -220,13 +213,6 @@ const DashboardNew = () => {
           if (data.transactions && Array.isArray(data.transactions)) {
             for (const transaction of data.transactions) {
               await financeService.createTransaction(transaction);
-            }
-          }
-          
-          // Import habits
-          if (data.habits && Array.isArray(data.habits)) {
-            for (const habit of data.habits) {
-              await habitService.createHabit(habit);
             }
           }
           
@@ -435,7 +421,6 @@ const DashboardNew = () => {
         >
           {activeTab === 'dashboard' && <Dashboard />}
           {activeTab === 'todos' && <TodoSection />}
-          {activeTab === 'habits' && <HabitTracker />}
           {activeTab === 'notes' && <NotesSection />}
           {activeTab === 'recipes' && (
             <RecipesSection 
