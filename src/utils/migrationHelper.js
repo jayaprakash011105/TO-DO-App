@@ -2,8 +2,7 @@ import {
   todoService, 
   noteService, 
   recipeService, 
-  financeService,
-  habitService 
+  financeService
 } from '../services/firebaseApi';
 import toast from 'react-hot-toast';
 
@@ -44,7 +43,6 @@ export const migrationHelper = {
       recipes: { success: 0, failed: 0 },
       transactions: { success: 0, failed: 0 },
       budgets: { success: 0, failed: 0 },
-      habits: { success: 0, failed: 0 },
       total: { success: 0, failed: 0 }
     };
 
@@ -155,29 +153,6 @@ export const migrationHelper = {
         }
       }
 
-      // Migrate Habits
-      const habits = JSON.parse(localStorage.getItem(`habits_${userId}`) || '[]');
-      
-      for (const habit of habits) {
-        try {
-          await habitService.createHabit({
-            name: habit.name,
-            description: habit.description,
-            frequency: habit.frequency,
-            target: habit.target,
-            unit: habit.unit,
-            color: habit.color,
-            icon: habit.icon,
-            completedDates: habit.completedDates || [],
-            streak: habit.streak || 0,
-            bestStreak: habit.bestStreak || 0
-          });
-          results.habits.success++;
-        } catch (error) {
-          console.error('Failed to migrate habit:', error);
-          results.habits.failed++;
-        }
-      }
 
       // Calculate totals
       results.total.success = Object.values(results)

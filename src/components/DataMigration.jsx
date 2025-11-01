@@ -14,8 +14,7 @@ const DataMigration = ({ onClose, onComplete }) => {
     todos: 0,
     notes: 0,
     recipes: 0,
-    transactions: 0,
-    habits: 0
+    transactions: 0
   });
 
   useEffect(() => {
@@ -30,7 +29,6 @@ const DataMigration = ({ onClose, onComplete }) => {
     const notes = JSON.parse(localStorage.getItem('todo_app_notes') || '[]');
     const recipes = JSON.parse(localStorage.getItem('todo_app_recipes') || '[]');
     const transactions = JSON.parse(localStorage.getItem('todo_app_transactions') || '[]');
-    const habits = JSON.parse(localStorage.getItem(`habits_${user.id}`) || '[]');
 
     const userTodos = todos.filter(item => item.userId === user.id);
     const userNotes = notes.filter(item => item.userId === user.id);
@@ -41,8 +39,7 @@ const DataMigration = ({ onClose, onComplete }) => {
       todos: userTodos.length,
       notes: userNotes.length,
       recipes: userRecipes.length,
-      transactions: userTransactions.length,
-      habits: habits.length
+      transactions: userTransactions.length
     };
 
     setDataPreview(preview);
@@ -186,12 +183,6 @@ const DataMigration = ({ onClose, onComplete }) => {
                       <span className="font-semibold">{dataPreview.transactions}</span>
                     </div>
                   )}
-                  {dataPreview.habits > 0 && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">Habits:</span>
-                      <span className="font-semibold">{dataPreview.habits}</span>
-                    </div>
-                  )}
                 </div>
               </div>
 
@@ -266,12 +257,6 @@ const DataMigration = ({ onClose, onComplete }) => {
                       <div className="flex justify-between">
                         <span>Transactions migrated:</span>
                         <span className="font-semibold">{migrationResults.transactions.success}</span>
-                      </div>
-                    )}
-                    {migrationResults.habits.success > 0 && (
-                      <div className="flex justify-between">
-                        <span>Habits migrated:</span>
-                        <span className="font-semibold">{migrationResults.habits.success}</span>
                       </div>
                     )}
                     <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
